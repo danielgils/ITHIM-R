@@ -162,8 +162,8 @@ monteria2 <- subset(adulto_persona2, nivel_urb == 1)
 #' *Cali*
 cali1 <- subset(adulto_persona2, DEPTO == "VALLE DEL CAUCA" & cabecera.x == 1)
 cali2 <- subset(adulto_persona2, nivel_urb == 1)
-write_csv(medellin1, "C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/Data/Colombia/Medellin/Cleaned/pa_medellin_wb.csv")
-write_csv(medellin2, "C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/Data/Colombia/Medellin/Cleaned/pa_medellin_wb2.csv")
+write_csv(cali1, "C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/Data/Colombia/Cali/Cleaned/pa_cali_wb.csv")
+write_csv(cali2, "C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/Data/Colombia/Cali/Cleaned/pa_cali_wb2.csv")
 
 #' *Pereira*
 pereira1 <- subset(adulto_persona2, DEPTO == "RISARALDA" & cabecera.x == 1)

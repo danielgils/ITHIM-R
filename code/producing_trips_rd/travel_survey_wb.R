@@ -1,6 +1,7 @@
 # This script is similar to travel_survey but it is only for cities made by Daniel in the World Bank
 # Last update: September 2020
 
+library(foreign) 
 
 ####Medellin - Colombia (WB) ####
 rm(list =ls())
@@ -154,3 +155,9 @@ rd <- trip %>% select(participant_id, age, sex, trip_id, trip_mode, trip_duratio
 
 # Reorder and select columns
 write_csv(rd, 'inst/extdata/local/medellin_wb/trips_medellin_wb.csv')
+
+#### Sao Paulo - Brazil (WB) ####
+rm(list =ls())
+source("code/producing_trips_rd/used_functions.R")
+options(scipen = 50)
+trips <- read.dbf("C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/Data/Brazil/SaoPaulo/OD 2017/Banco de dados/OD_2017.dbf")
