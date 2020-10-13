@@ -99,7 +99,10 @@ unique(adulto_persona$AFAD24B)
 table(adulto_persona$AFAD16B, adulto_persona$AFAD16A, useNA = "always")
 
 adulto_persona2 <- adulto_persona %>% 
-  mutate(ltpa_walk_duration = ifelse(AFAD14 == 1 & !is.na(AFAD14),
+  mutate(id = LLAVE_PERSONA,
+         sex = ifelse(sexo.x == 1, "male", "female"),
+         age = PT5_5,
+    ltpa_walk_duration = ifelse(AFAD14 == 1 & !is.na(AFAD14),
                                      ifelse(AFAD16A >= 0, 
                                             AFAD16A * 60 + AFAD16B, 0),0),
          ltpa_walk_days = AFAD15,
@@ -125,6 +128,9 @@ adulto_persona2 <- adulto_persona %>%
                              na.rm = T))/60,
          work_ltpa_marg_met = ltpa_marg_met
   )
+
+# Filtering only the variables I need in ithim
+#adulto_persona2 <- subset(adulto_persona2, select = c(""))
 
 #' *ToDo*: physical activity in children and teenagers. Although there's no enough
 #' information
@@ -153,7 +159,11 @@ adulto_persona2 <- adulto_persona %>%
 medellin1 <- subset(adulto_persona2, DEPTO == "ANTIOQUIA" & cabecera.x == 1)
 medellin2 <- subset(adulto_persona2, nivel_urb == 1)
 write_csv(medellin1, "C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/Data/Colombia/Medellin/Cleaned/pa_medellin_wb.csv")
+write_csv(medellin1, 'inst/extdata/local/medellin_wb/pa_medellin_wb.csv')
+write_csv(medellin1, 'data/local/medellin_wb/pa_medellin_wb.csv')
 write_csv(medellin2, "C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/Data/Colombia/Medellin/Cleaned/pa_medellin_wb2.csv")
+write_csv(medellin2, 'inst/extdata/local/medellin_wb/pa_medellin_wb2.csv')
+write_csv(medellin2, 'data/local/medellin_wb/pa_medellin_wb2.csv')
 
 #' *Monteria*
 monteria1 <- subset(adulto_persona2, DEPTO == "CORDOBA" & cabecera.x == 1)
