@@ -9,12 +9,12 @@ rm(list =ls())
 
 source("code/producing_trips_rd/used_functions.R")
 
-person_0 <- read_sav('V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/Argentina/WP1-TS/Buenos Aires/ENMODO_PERSONAS_pub_20121115.sav')
-trip_0 <- read_sav("V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/Argentina/WP1-TS/Buenos Aires/ENMODO_VIAJES_pub_20121115.sav")
-stage_0 <- read_sav('V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/Argentina/WP1-TS/Buenos Aires/ENMODO_ETAPAS_pub_20121115.sav')
+person_0 <- read_sav('V://Studies//MOVED//HealthImpact//Data//TIGTHAT//Argentina//WP1-TS//Buenos Aires//ENMODO_PERSONAS_pub_20121115.sav')
+trip_0 <- read_sav("V://Studies//MOVED//HealthImpact//Data//TIGTHAT//Argentina//WP1-TS//Buenos Aires//ENMODO_VIAJES_pub_20121115.sav")
+stage_0 <- read_sav('V://Studies//MOVED//HealthImpact//Data//TIGTHAT//Argentina//WP1-TS//Buenos Aires//ENMODO_ETAPAS_pub_20121115.sav')
 
-trip_purpose <- read_excel("V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/Argentina/WP1-TS/Buenos Aires/lookup.xlsx",sheet = "trip_purpose", range = cell_cols("A:B"))
-stage_mode <- read_excel("V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/Argentina/WP1-TS/Buenos Aires/lookup.xlsx",sheet= "stage_mode", range = cell_cols("A:C"))# also ranks the modes 
+trip_purpose <- read_excel("V://Studies//MOVED//HealthImpact//Data//TIGTHAT//Argentina//WP1-TS//Buenos Aires//lookup.xlsx",sheet = "trip_purpose", range = cell_cols("A:B"))
+stage_mode <- read_excel("V://Studies//MOVED//HealthImpact//Data//TIGTHAT//Argentina//WP1-TS//Buenos Aires//lookup.xlsx",sheet= "stage_mode", range = cell_cols("A:C"))# also ranks the modes 
 
 #keep relevant variables
 person <- person_0[,c("PARTIDO","IDH","IDP", "EDAD", "SEXO","wt1")]
@@ -67,8 +67,8 @@ trip <- person %>%
            stage_id = IDE) %>% 
     select(cluster_id, household_id, participant_id, 
            participant_wt, age, sex, trip_id, trip_purpose, 
-           trip_mode, trip_duration, trip_distance, stage_id,
-           stage_mode, stage_duration, stage_distance)
+           trip_mode, trip_duration, stage_id,
+           stage_mode, stage_duration)
 
 
 trip$year <- 2012
@@ -98,8 +98,7 @@ rd$participant_id <- as.integer(as.factor(with(rd, paste(cluster_id, household_i
 rd$trip_id <- as.integer(as.factor(with(rd, paste(cluster_id, household_id, participant_id, pid, trip_id,  sep = "_"))))
 
 # Reorder and select columns
-rd1 <- rd %>% dplyr::select(participant_id, age, sex, trip_id, trip_mode, trip_duration, trip_distance, 
-                            stage_id, stage_mode, stage_duration, stage_distance)
+rd1 <- rd %>% dplyr::select(participant_id, age, sex, trip_id, trip_mode, trip_duration, stage_id, stage_mode, stage_duration)
 
 write_csv(rd1, 'inst/extdata/local/buenos_aires/trips_buenos_aires.csv')
 
@@ -151,11 +150,11 @@ a<-rbind(a, trip_sel)
 rm("cba_hh", "cba_pp", "cba_stg", "cba_trip","trip_sel")
 
 #####Argentina Mendoza##########
-setwd('V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/Argentina/WP1-TS/')
-mza_hh<-read.csv('Mendoza/mza-hh.csv')
-mza_pp<-read.csv('Mendoza/mza-pp.csv')
-mza_trip<-read.csv('Mendoza/mza-trip.csv')
-mza_stg<-read.csv('Mendoza/mza-stages.csv')
+setwd('V://Studies//MOVED//HealthImpact//Data//TIGTHAT//Argentina//WP1-TS//')
+mza_hh<-read.csv('Mendoza//mza-hh.csv')
+mza_pp<-read.csv('Mendoza//mza-pp.csv')
+mza_trip<-read.csv('Mendoza//mza-trip.csv')
+mza_stg<-read.csv('Mendoza//mza-stages.csv')
 
 mza_pp$female<-0
 mza_pp$female[which(mza_pp$sexo=="Femenino")]<-1
@@ -215,11 +214,11 @@ a<-rbind(a, trip_sel)
 rm("mza_hh", "mza_pp", "mza_stg", "mza_trip","trip_sel")
 
 #####Argentina Neuqu?n y Cipolletti#############
-setwd('V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/Argentina/WP1-TS/')
-nqn_cipp_hh<-read.csv('Neuqu?n y Cipolletti/nqn_cipp-hh.csv')
-nqn_cipp_pp<-read.csv('Neuqu?n y Cipolletti/nqn_cipp-pp.csv')
-nqn_cipp_trip<-read.csv('Neuqu?n y Cipolletti/nqn_cipp-trip.csv')
-nqn_cipp_stg<-read.csv('Neuqu?n y Cipolletti/nqn_cipp-stages.csv')
+setwd('V://Studies//MOVED//HealthImpact//Data//TIGTHAT//Argentina//WP1-TS//')
+nqn_cipp_hh<-read.csv('Neuqu?n y Cipolletti//nqn_cipp-hh.csv')
+nqn_cipp_pp<-read.csv('Neuqu?n y Cipolletti//nqn_cipp-pp.csv')
+nqn_cipp_trip<-read.csv('Neuqu?n y Cipolletti//nqn_cipp-trip.csv')
+nqn_cipp_stg<-read.csv('Neuqu?n y Cipolletti//nqn_cipp-stages.csv')
 nqn_cipp_pp$female<-0
 nqn_cipp_pp$female[which(nqn_cipp_pp$Sexo=="Mujer")]<-1
 pp_sel<-subset(nqn_cipp_pp, select=c("ID_HOGAR","ID_CP","Edad", "female" )) ## selecting the individual level variables
@@ -253,11 +252,11 @@ a<-rbind(a, trip_sel)
 rm("nqn_cipp_hh", "nqn_cipp_pp", "nqn_cipp_stg", "nqn_cipp_trip","trip_sel")
 
 #####Argentina Posadas###############
-setwd('V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/Argentina/WP1-TS/')
-posadas_hh<-read.csv('Posadas/posadas-hh.csv')
-posadas_pp<-read.csv('Posadas/posadas-pp.csv')
-posadas_trip<-read.csv('Posadas/posadas-trip.csv')
-posadas_stg<-read.csv('Posadas/posadas-stages.csv')
+setwd('V://Studies//MOVED//HealthImpact//Data//TIGTHAT//Argentina//WP1-TS//')
+posadas_hh<-read.csv('Posadas//posadas-hh.csv')
+posadas_pp<-read.csv('Posadas//posadas-pp.csv')
+posadas_trip<-read.csv('Posadas//posadas-trip.csv')
+posadas_stg<-read.csv('Posadas//posadas-stages.csv')
 
 posadas_pp$female<-0
 posadas_pp$female[which(posadas_pp$Sexo=="Mujer")]<-1
@@ -288,11 +287,11 @@ rm("posadas_hh", "posadas_pp", "posadas_stg", "posadas_trip","trip_sel")
 
 
 #####Argentina Resistencia-Corrientes#############
-setwd('V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/Argentina/WP1-TS/')
-res_corr_hh<-read.csv('Resistencia-Corrientes/res_corr-hh.csv')
-res_corr_pp<-read.csv('Resistencia-Corrientes/res_corr-pp.csv')
-res_corr_trip<-read.csv('Resistencia-Corrientes/res_corr-trip.csv')
-res_corr_stg<-read.csv('Resistencia-Corrientes/res_corr-stages.csv')
+setwd('V://Studies//MOVED//HealthImpact//Data//TIGTHAT//Argentina//WP1-TS//')
+res_corr_hh<-read.csv('Resistencia-Corrientes//res_corr-hh.csv')
+res_corr_pp<-read.csv('Resistencia-Corrientes//res_corr-pp.csv')
+res_corr_trip<-read.csv('Resistencia-Corrientes//res_corr-trip.csv')
+res_corr_stg<-read.csv('Resistencia-Corrientes//res_corr-stages.csv')
 
 res_corr_pp$female<-0
 res_corr_pp$female[which(res_corr_pp$Sexo=="Mujer")]<-1
@@ -339,10 +338,10 @@ a<-rbind(a, trip_sel)
 rm("res_corr_hh", "res_corr_pp", "res_corr_stg", "res_corr_trip","trip_sel")
 
 #####Argentina Rosario##############
-setwd('V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/Argentina/WP1-TS/')
-rosario_hh<-read.csv('Rosario/rosario-hh.csv')
-rosario_pp<-read.csv('Rosario/rosario-pp.csv')
-rosario_trip<-read.csv('Rosario/rosario-trip.csv')
+setwd('V://Studies//MOVED//HealthImpact//Data//TIGTHAT//Argentina//WP1-TS//')
+rosario_hh<-read.csv('Rosario//rosario-hh.csv')
+rosario_pp<-read.csv('Rosario//rosario-pp.csv')
+rosario_trip<-read.csv('Rosario//rosario-trip.csv')
 
 ## trip file in Rosario consists of stages
 ## assigning lowest hierarchy to walk (1), middle to cycle (2) and 3 to all others: maximum of these in a given trip is assigned as the main_mode
@@ -380,11 +379,11 @@ a<-rbind(a, trip_sel)
 rm("rosario_hh", "rosario_pp", "rosario_trip","trip_sel")
 
 #####Argentina Salta###########
-setwd('V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/Argentina/WP1-TS/')
-salta_hh<-read.csv('Salta/salta-hh.csv')
-salta_pp<-read.csv('Salta/salta-pp.csv')
-salta_trip<-read.csv('Salta/salta-trip.csv')
-salta_stages<-read.csv('Salta/salta-stages.csv')
+setwd('V://Studies//MOVED//HealthImpact//Data//TIGTHAT//Argentina//WP1-TS//')
+salta_hh<-read.csv('Salta//salta-hh.csv')
+salta_pp<-read.csv('Salta//salta-pp.csv')
+salta_trip<-read.csv('Salta//salta-trip.csv')
+salta_stages<-read.csv('Salta//salta-stages.csv')
 pp_sel<-subset(salta_pp, select=c("ID_HOGAR","ID_CP","Sexo", "Edad_pers" )) ## selecting the individual level variables
 
 pp_sel$female<-0
@@ -426,11 +425,11 @@ a<-rbind(a, trip_sel)
 rm("salta_hh", "salta_pp", "salta_trip","salta_stages","trip_sel")
 
 #####Argentina Tucuman#############
-setwd('V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/Argentina/WP1-TS/')
-tucuman_hh<-read.csv('Tucuman/tucuman-hh.csv')
-tucuman_pp<-read.csv('Tucuman/tucuman-pp.csv')
-tucuman_trip<-read.csv('Tucuman/tucuman-trip.csv')
-tucuman_stages<-read.csv('Tucuman/tucuman-stages.csv')
+setwd('V://Studies//MOVED//HealthImpact//Data//TIGTHAT//Argentina//WP1-TS//')
+tucuman_hh<-read.csv('Tucuman//tucuman-hh.csv')
+tucuman_pp<-read.csv('Tucuman//tucuman-pp.csv')
+tucuman_trip<-read.csv('Tucuman//tucuman-trip.csv')
+tucuman_stages<-read.csv('Tucuman//tucuman-stages.csv')
 
 pp_sel<-subset(tucuman_pp, select=c("ID_PERS", "FORMULARIO","SEXO", "EDAD"))
 pp_sel$female<-0
@@ -461,7 +460,7 @@ rm("tucuman_hh", "tucuman_pp", "tucuman_trip","tucuman_stages","trip_sel", "pp_s
 ## Defining a work trip
 ## If DESTPURP1 is 7 (work) it is a work trip
 ## If DESTPURP1 is 8 (home) and ORIGPURP1 is 7 is is a work trip
-setwd('V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/Australia/Australian travel survey/Queensland/Original data')
+setwd('V://Studies//MOVED//HealthImpact//Data//TIGTHAT//Australia//Australian travel survey//Queensland//Original data')
 person<-read.csv('SEQ_HTS_PERSONS.csv')
 trips<- read.csv('SEQ_HTS_TRIPS.csv')
 HHS<- read.csv('SEQ_HTS_HOUSEHOLDS.csv')
@@ -511,7 +510,7 @@ rm("person","trips", "HHS")
 ## Defining a work trip
 ## If DESTPURP1 is 7 (work) it is a work trip
 ## If DESTPURP1 is 8 (home) and ORIGPURP1 is 7 is is a work trip
-setwd('V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/Australia/Australian travel survey/Queensland/Original data')
+setwd('V://Studies//MOVED//HealthImpact//Data//TIGTHAT//Australia//Australian travel survey//Queensland//Original data')
 person<-read.csv('GLD_PERSONS.csv')
 trips<- read.csv('GLD_TRIPS.csv')
 for (i in 1: nrow(trips))
@@ -555,7 +554,7 @@ rm("person","trips")
 ## Defining a work trip
 ## If DESTPURP1 is 7 (work) it is a work trip
 ## If DESTPURP1 is 8 (home) and ORIGPURP1 is 7 is is a work trip
-setwd('V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/Australia/Australian travel survey/Queensland/Original data')
+setwd('V://Studies//MOVED//HealthImpact//Data//TIGTHAT//Australia//Australian travel survey//Queensland//Original data')
 person<-read.csv('WBB_PERSONS.csv')
 trips<- read.csv('WBB_TRIPS.csv')
 HHS<- read.csv('WBB_HHS.csv')
@@ -609,7 +608,7 @@ rm("person","trips", "HHS")
 ## Defining a work trip
 ## If DESTPURP1 is 7 (work) it is a work trip
 ## If DESTPURP1 is 8 (home) and ORIGPURP1 is 7 is is a work trip
-setwd('V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/Australia/Australian travel survey/Queensland/Original data')
+setwd('V://Studies//MOVED//HealthImpact//Data//TIGTHAT//Australia//Australian travel survey//Queensland//Original data')
 person<-read.csv('MKY_PERSONS.csv')
 trips<- read.csv('MKY_TRIPS.csv')
 for (i in 1: nrow(trips))
@@ -655,7 +654,7 @@ rm("person","trips")
 ## Defining a work trip
 ## If DESTPURP1 is 7 (work) it is a work trip
 ## If DESTPURP1 is 8 (home) and ORIGPURP1 is 7 is is a work trip
-setwd('V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/Australia/Australian travel survey/Queensland/Original data')
+setwd('V://Studies//MOVED//HealthImpact//Data//TIGTHAT//Australia//Australian travel survey//Queensland//Original data')
 person<-read.csv('TVL_PERSONS.csv')
 trips<- read.csv('TVL_TRIPS.csv')
 for (i in 1: nrow(trips))
@@ -700,7 +699,7 @@ rm("person","trips")
 ## Defining a work trip
 ## If DESTPURP1 is 7 (work) it is a work trip
 ## If DESTPURP1 is 8 (home) and ORIGPURP1 is 7 is is a work trip
-setwd('V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/Australia/Australian travel survey/Queensland/Original data')
+setwd('V://Studies//MOVED//HealthImpact//Data//TIGTHAT//Australia//Australian travel survey//Queensland//Original data')
 person<-read.csv('DD_PERSONS.csv')
 trips<- read.csv('DD_TRIPS.csv')
 HHS<- read.csv('DD_HOUSEHOLDS.csv')
@@ -751,7 +750,7 @@ rm("person","trips", "HHS", "areas")
 ## Defining a work trip
 ## If DESTPURP1 is 7 (work) it is a work trip
 ## If DESTPURP1 is 8 (home) and ORIGPURP1 is 7 is is a work trip
-setwd('V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/Australia/Australian travel survey/Queensland/Original data')
+setwd('V://Studies//MOVED//HealthImpact//Data//TIGTHAT//Australia//Australian travel survey//Queensland//Original data')
 person<-read.csv('TWB_PERSONS.csv')
 trips<- read.csv('TWB_TRIPS.csv')
 for (i in 1: nrow(trips))
@@ -795,7 +794,7 @@ rm("person","trips")
 ## Defining a work trip
 ## If DESTPURP1 is 7 (work) it is a work trip
 ## If DESTPURP1 is 8 (home) and ORIGPURP1 is 7 is is a work trip
-setwd('V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/Australia/Australian travel survey/Queensland/Original data')
+setwd('V://Studies//MOVED//HealthImpact//Data//TIGTHAT//Australia//Australian travel survey//Queensland//Original data')
 person<-read.csv('CNS_PERSONS.csv')
 trips<- read.csv('CNS_TRIPS.csv')
 for (i in 1: nrow(trips))
@@ -840,7 +839,7 @@ rm("person","trips")
 ## Defining a work trip
 ## If DESTPURP1 is 7 (work) it is a work trip
 ## If DESTPURP1 is 8 (home) and ORIGPURP1 is 7 is is a work trip
-setwd('V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/Australia/Australian travel survey/Queensland/Original data')
+setwd('V://Studies//MOVED//HealthImpact//Data//TIGTHAT//Australia//Australian travel survey//Queensland//Original data')
 person<-read.csv('RKH_PERSONS.csv')
 trips<- read.csv('RKH_TRIPS.csv')
 for (i in 1: nrow(trips))
@@ -885,7 +884,7 @@ rm("person","trips")
 ## Defining a work trip
 ## If DESTPURP1 is 7 (work) it is a work trip
 ## If DESTPURP1 is 8 (home) and ORIGPURP1 is 7 is is a work trip
-setwd('V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/Australia/Australian travel survey/Queensland/Original data')
+setwd('V://Studies//MOVED//HealthImpact//Data//TIGTHAT//Australia//Australian travel survey//Queensland//Original data')
 person<-read.csv('GC_PERSONS.csv')
 trips<- read.csv('GC_TRIPS.csv')
 for (i in 1: nrow(trips))
@@ -930,7 +929,7 @@ rm("person","trips")
 ## Defining a work trip
 ## If DESTPURP1 is 7 (work) it is a work trip
 ## If DESTPURP1 is 8 (home) and ORIGPURP1 is 7 is is a work trip
-setwd('V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/Australia/Australian travel survey/Victoria/Original data')
+setwd('V://Studies//MOVED//HealthImpact//Data//TIGTHAT//Australia//Australian travel survey//Victoria//Original data')
 person<-read.csv('P_VISTA12_16_SA1_V1.csv')
 trips<- read.csv('T_VISTA12_16_SA1_V1.csv')
 for (i in 1: nrow(trips))
@@ -976,7 +975,7 @@ rm(list =ls())
 
 source("code/producing_trips_rd/used_functions.R")
 
-trip_0 <- read.csv('V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/Brazil/Sao Paulo/Pesquisa Origem Destino 2012/Mobilidade_2012_v0.csv')
+trip_0 <- read.csv('V://Studies//MOVED//HealthImpact//Data//TIGTHAT//Brazil//Sao Paulo//Pesquisa Origem Destino 2012//Mobilidade_2012_v0.csv')
 
 trip_mode <- data.frame(MODOPRIN = 1:17,
                         trip_mode = c("bus","bus","bus","bus","bus",
@@ -997,7 +996,10 @@ no_trip <-  trip_0 %>% filter(is.na(MODO1) & is.na(MODO2) & is.na(MODO3) & is.na
 trip <- setdiff(trip_0, no_trip) %>%
     gather("stage_id","stg_mode", MODO1, MODO2, MODO3, MODO4 ) %>% 
     filter(!is.na(stg_mode)) %>% 
-    bind_rows(no_trip %>% rename(stage_id = MODO1, stg_mode= MODO2) %>% select(-c(MODO3, MODO4))) %>% 
+    bind_rows(no_trip %>% 
+                rename(stage_id = MODO1, stg_mode= MODO2) %>%
+                select(-c(MODO3, MODO4)) %>% 
+                mutate(stage_id = as.character(stage_id))) %>% 
     mutate(stage_id = ifelse(stage_id =="MODO1", 1, 
                              ifelse(stage_id=="MODO2",2,
                                     ifelse(stage_id == "MODO3", 3, 
@@ -1054,8 +1056,8 @@ rm(list =ls())
 
 source("code/producing_trips_rd/used_functions.R")
 
-trip_0 <- read.table('V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/Brazil/Belo Horizonte/Travel survey/dbo_TB_VIAGENS_INTERNAS_RMBH.txt', header = TRUE, sep=",")
-person_0 <- read.table('V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/Brazil/Belo Horizonte/Travel survey/dbo_TB_DOMICILIO_PESSOA_ENTREGA.txt', header = TRUE, sep=",")
+trip_0 <- read.table('V://Studies//MOVED//HealthImpact//Data//TIGTHAT//Brazil//Belo Horizonte//Travel survey//dbo_TB_VIAGENS_INTERNAS_RMBH.txt', header = TRUE, sep=",")
+person_0 <- read.table('V://Studies//MOVED//HealthImpact//Data//TIGTHAT//Brazil//Belo Horizonte//Travel survey//dbo_TB_DOMICILIO_PESSOA_ENTREGA.txt', header = TRUE, sep=",")
 #hh_weights_0<- read.table('dbo_TB_FATOR_EXPANS?O_DOMIC?LIO.txt', header = TRUE, sep=",")
 
 
@@ -1121,7 +1123,7 @@ rd1 <- rd %>% dplyr::select(participant_id, age, sex, trip_id, trip_mode, trip_d
 write_csv(rd1, 'inst/extdata/local/belo_horizonte/trips_belo_horizonte.csv')
 
 #####Brazil Salvador######
-setwd('V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/Brazil/Salvador')
+setwd('V://Studies//MOVED//HealthImpact//Data//TIGTHAT//Brazil//Salvador')
 trips<-read.csv('trips.csv')
 persons<- read.csv('individual.csv')
 hh<- read.csv('household.csv')
@@ -1159,7 +1161,7 @@ x<- trips  %>% group_by(mode_eng) %>% summarise(mean (trip_duration, na.rm=T))
 
 #####Chile Antofagasta#####
 ###added duration in the raw excel file as the column 'duration'
-setwd('V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/Chile/Travel Surveys/Antofagasta')
+setwd('V://Studies//MOVED//HealthImpact//Data//TIGTHAT//Chile//Travel Surveys//Antofagasta')
 person<-read.csv('Persona.csv')
 trips<- read.csv('Viaje.csv')
 age<-read.csv('Edad de personas.csv')
@@ -1209,14 +1211,14 @@ rm(list =ls())
 
 source("code/producing_trips_rd/used_functions.R")
 
-person_0 <- read.csv("V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/Chile/Travel Surveys/Santiago/Persona.csv")
-trip_0 <- read.csv("V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/Chile/Travel Surveys/Santiago/Viaje.csv")
-stage_0 <- read.csv("V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/Chile/Travel Surveys/Santiago/stages.csv")
+person_0 <- read.csv("V://Studies//MOVED//HealthImpact//Data//TIGTHAT//Chile//Travel Surveys//Santiago//Persona.csv")
+trip_0 <- read.csv("V://Studies//MOVED//HealthImpact//Data//TIGTHAT//Chile//Travel Surveys//Santiago//Viaje.csv")
+stage_0 <- read.csv("V://Studies//MOVED//HealthImpact//Data//TIGTHAT//Chile//Travel Surveys//Santiago//stages.csv")
 
-age <- read.csv('V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/Chile/Travel Surveys/Santiago/EdadPersonas.csv')
-trip_purpose <- read.csv("V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/Chile/Travel Surveys/Santiago/lookup_trip_purpose.csv")
-trip_mode <- read.csv("V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/Chile/Travel Surveys/Santiago/lookup_trip_mode.csv")
-stage_mode <- read.csv("V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/Chile/Travel Surveys/Santiago/lookup_stage_mode.csv")
+age <- read.csv('V://Studies//MOVED//HealthImpact//Data//TIGTHAT//Chile//Travel Surveys//Santiago//EdadPersonas.csv')
+trip_purpose <- read.csv("V://Studies//MOVED//HealthImpact//Data//TIGTHAT//Chile//Travel Surveys//Santiago//lookup_trip_purpose.csv")
+trip_mode <- read.csv("V://Studies//MOVED//HealthImpact//Data//TIGTHAT//Chile//Travel Surveys//Santiago//lookup_trip_mode.csv")
+stage_mode <- read.csv("V://Studies//MOVED//HealthImpact//Data//TIGTHAT//Chile//Travel Surveys//Santiago//lookup_stage_mode.csv")
 sex <- bind_cols(sex= c("Male", "Female"), Sexo = c(1,2))
 
 
@@ -1299,7 +1301,7 @@ write_csv(rd2, 'inst/extdata/local/santiago/trips_santiago.csv')
 
 #####Chile Arica####
 ###added duration in the raw excel file (Viaje) as the column 'duration'
-setwd('V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/Chile/Travel Surveys/Arica')
+setwd('V://Studies//MOVED//HealthImpact//Data//TIGTHAT//Chile//Travel Surveys//Arica')
 person<-read.csv('Persona.csv')
 trips<- read.csv('Viaje.csv')
 age<-read.csv('Edad de personas.csv')
@@ -1342,7 +1344,7 @@ rm("person","trips","age")
 
 #####Chile Copiapo####
 ###added duration in the raw excel file (Viaje) as the column 'duration'
-setwd('V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/Chile/Travel Surveys/Copiapo')
+setwd('V://Studies//MOVED//HealthImpact//Data//TIGTHAT//Chile//Travel Surveys//Copiapo')
 person<-read.csv('Persona.csv')
 trips<- read.csv('Viaje.csv')
 age<-read.csv('Edad de personas.csv')
@@ -1387,7 +1389,7 @@ rm("person","trips","age")
 
 #####Chile Coquimbo-La Serena####
 ###added duration in the raw excel file (Viaje) as the column 'duration'
-setwd('V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/Chile/Travel Surveys/Coquimbo-La Serena')
+setwd('V://Studies//MOVED//HealthImpact//Data//TIGTHAT//Chile//Travel Surveys//Coquimbo-La Serena')
 person<-read.csv('Persona.csv')
 trips<- read.csv('Viaje.csv')
 age<-read.csv('Edad de personas.csv')
@@ -1430,7 +1432,7 @@ rm("person","trips","age")
 
 #####Chile Gran Valparaiso#### DOES NOT HAVE AGE!######
 ###added duration in the raw excel file (Viaje) as the column 'duration'
-setwd('V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/Chile/Travel Surveys/Gran Valparaiso')
+setwd('V://Studies//MOVED//HealthImpact//Data//TIGTHAT//Chile//Travel Surveys//Gran Valparaiso')
 person<-read.csv('Persona.csv')
 trips<- read.csv('Viaje.csv')
 str(person)
@@ -1470,7 +1472,7 @@ rm("person","trips")
 
 #####Chile Iquique####
 ###added duration in the raw excel file (Viaje) as the column 'duration'
-setwd('V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/Chile/Travel Surveys/Iquique')
+setwd('V://Studies//MOVED//HealthImpact//Data//TIGTHAT//Chile//Travel Surveys//Iquique')
 person<-read.csv('Persona.csv')
 trips<- read.csv('Viaje.csv')
 age<-read.csv('Edad de personas.csv')
@@ -1502,7 +1504,7 @@ rm("person","trips","age")
 
 #####Chile Puerto Montt####
 ###added duration in the raw excel file (Viaje) as the column 'duration'
-setwd('V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/Chile/Travel Surveys/Puerto Montt')
+setwd('V://Studies//MOVED//HealthImpact//Data//TIGTHAT//Chile//Travel Surveys//Puerto Montt')
 person<-read.csv('Persona.csv')
 trips<- read.csv('Viaje.csv')
 age<-read.csv('Edad de personas.csv')
@@ -1546,7 +1548,7 @@ rm("person","trips","age")
 
 #####Chile Temuco-Padre Lascasas####
 ###added duration in the raw excel file (Viaje) as the column 'duration'
-setwd('V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/Chile/Travel Surveys/Temuco-Padre Lascasas')
+setwd('V://Studies//MOVED//HealthImpact//Data//TIGTHAT//Chile//Travel Surveys//Temuco-Padre Lascasas')
 person<-read.csv('Persona.csv')
 trips<- read.csv('Viaje.csv')
 age<-read.csv('Edad de personas.csv')
@@ -1590,7 +1592,7 @@ rm("person","trips","age")
 
 #####Chile Valdivia####
 ###added duration in the raw excel file (Viaje) as the column 'duration'
-setwd('V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/Chile/Travel Surveys/Valdivia')
+setwd('V://Studies//MOVED//HealthImpact//Data//TIGTHAT//Chile//Travel Surveys//Valdivia')
 person<-read.csv('Persona.csv')
 trips<- read.csv('Viaje.csv')
 age<-read.csv('Edad de personas.csv')
@@ -1638,14 +1640,14 @@ rm(list =ls())
 source("code/producing_trips_rd/used_functions.R")
 
 #data
-person_0 <- read_excel("V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/Colombia/Bogota/Travel/encuesta 2015 - personas.xlsx",sheet = 1, range = cell_cols("A:BS"))
-trip_0 <- read_excel("V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/Colombia/Bogota/Travel/encuesta 2015 - viajes.xlsx",sheet = 1, range = cell_cols("A:K"))
-stage_0 <- read_excel("V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/Colombia/Bogota/Travel/encuesta 2015 - etapas.xlsx",sheet = 1, range = cell_cols("A:K"))
+person_0 <- read_excel("V://Studies//MOVED//HealthImpact//Data//TIGTHAT//Colombia//Bogota//Travel//trips_2015//encuesta 2015 - personas.xlsx",sheet = 1, range = cell_cols("A:BS"))
+trip_0 <- read_excel("V://Studies//MOVED//HealthImpact//Data//TIGTHAT//Colombia//Bogota//Travel//trips_2015//encuesta 2015 - viajes.xlsx",sheet = 1, range = cell_cols("A:K"))
+stage_0 <- read_excel("V://Studies//MOVED//HealthImpact//Data//TIGTHAT//Colombia//Bogota//Travel//trips_2015//encuesta 2015 - etapas.xlsx",sheet = 1, range = cell_cols("A:K"))
 
 #lookup tables
-trip_mode <- read_excel("V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/Colombia/Bogota/Travel/lookup_trip_mode.xlsx",sheet = 1, range = cell_cols("A:B"))
-stage_mode <- read_excel("V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/Colombia/Bogota/Travel/lookup_stage_mode.xlsx",sheet = 1, range = cell_cols("A:B"))
-trip_purpose <-  read_excel("V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/Colombia/Bogota/Travel/lookup_trip_purpose.xlsx",sheet = 1, range = cell_cols("A:B"))
+trip_mode <- read_excel("V://Studies//MOVED//HealthImpact//Data//TIGTHAT//Colombia//Bogota//Travel//trips_2015//lookup_trip_mode.xlsx",sheet = 1, range = cell_cols("A:B"))
+stage_mode <- read_excel("V://Studies//MOVED//HealthImpact//Data//TIGTHAT//Colombia//Bogota//Travel//trips_2015//lookup_stage_mode.xlsx",sheet = 1, range = cell_cols("A:B"))
+trip_purpose <-  read_excel("V://Studies//MOVED//HealthImpact//Data//TIGTHAT//Colombia//Bogota//Travel//trips_2015//lookup_trip_purpose.xlsx",sheet = 1, range = cell_cols("A:B"))
 
 
 #select relevant varaibles
@@ -1756,7 +1758,7 @@ write_csv(rd1, 'inst/extdata/local/bogota/trips_bogota.csv')
 #trip %>% filter(!is.na(trip_id) & is.na(trip_mode)) %>% View()
 
 #####England LONDON#####
-setwd('V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/London/LTDS0514_Combined_V3U_v1.2')
+setwd('V://Studies//MOVED//HealthImpact//Data//TIGTHAT//London//LTDS0514_Combined_V3U_v1.2')
 trips<-read.table('Trip_ltds.txt', header = TRUE, sep=",")
 stages<-read.table('Stage.txt', header=TRUE, sep=",")
 persons<- read.table('Person.txt', header=TRUE, sep=",")
@@ -1789,7 +1791,7 @@ stages_2 %>% group_by(tdbmmode, dist_cat) %>% filter(swalkdur>0) %>% summarise(m
 
 
 #####ENGLAND-- downloaded data (2002-2017)####
-setwd('V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/England/tab/')
+setwd('V://Studies//MOVED//HealthImpact//Data//TIGTHAT//England//tab//')
 trips<- read.delim('tripeul2017.tab', sep="\t")
 ind<- read.delim('individualeul2017.tab', sep="\t")
 str(trips)
@@ -1830,7 +1832,7 @@ a<-trip_sel
 
 rm("eng", "eng_stg", "eng_selected")
 #####Finland####
-setwd('V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/Finland/2016')
+setwd('V://Studies//MOVED//HealthImpact//Data//TIGTHAT//Finland//2016')
 trips<-read.csv('M_MATKAT.csv')
 background<- read.csv('T_TAUSTA.csv')
 colnames(trips)[1]<-"T_TAUSTAID"
@@ -1865,7 +1867,7 @@ rm(list =ls())
 source("code/producing_trips_rd/used_functions.R")
 
 # read data
-time_use_0 <- haven::read_spss("V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/Accra/Accra data and microdata/Time Use Survey/Data/GTUS 2009 24 Hours Individual Diary.sav")
+time_use_0 <- haven::read_spss("V://Studies//MOVED//HealthImpact//Data//TIGTHAT//Accra//Accra data and microdata//Time Use Survey//Data//GTUS 2009 24 Hours Individual Diary.sav")
 
 #lookup
 trip_mode <- data.frame(distinct(time_use_0, ActLoc2), 
@@ -1990,7 +1992,7 @@ write_csv(rd1, 'inst/extdata/local/accra/trips_accra.csv')
 
 
 #####Germany from Ralph####
-setwd('V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/USA 2017 and German 2008/Germany MOP')
+setwd('V://Studies//MOVED//HealthImpact//Data//TIGTHAT//USA 2017 and German 2008//Germany MOP')
 german <- read.dta13("MOP 2014 2015 2016 Pooled for Rahul.dta")
 #german <- read.dta13("MOP 2015 for Rahul.dta")
 german$country<- "Germany"
@@ -2010,8 +2012,8 @@ rm(list =ls())
 source("code/producing_trips_rd/used_functions.R")
 
 #data
-person_0 <- read.csv('V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/India/Delhi/persons.csv', na.strings = c("", "NA"))
-stage_0 <- read.csv('V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/India/Delhi/trips_stages_delhi.csv')
+person_0 <- read.csv('V://Studies//MOVED//HealthImpact//Data//TIGTHAT//India//Delhi//persons.csv', na.strings = c("", "NA"))
+stage_0 <- read.csv('V://Studies//MOVED//HealthImpact//Data//TIGTHAT//India//Delhi//trips_stages_delhi.csv')
 
 
 #lookups
@@ -2103,8 +2105,8 @@ rm(list =ls())
 
 source("code/producing_trips_rd/used_functions.R")
 
-person_0 <- read_excel("V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/India/Bangalore/HH information-urban bmr.xlsx",sheet = 1, range = cell_cols("A:AM"),col_types = c("text"))
-stage_0 <- read_excel("V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/India/Bangalore/COMPILED DATA final.xlsx",sheet = 1, range = cell_cols("A:AA"), col_types = c("text"))
+person_0 <- read_excel("V://Studies//MOVED//HealthImpact//Data//TIGTHAT//India//Bangalore//HH information-urban bmr.xlsx",sheet = 1, range = cell_cols("A:AM"),col_types = c("text"))
+stage_0 <- read_excel("V://Studies//MOVED//HealthImpact//Data//TIGTHAT//India//Bangalore//COMPILED DATA final.xlsx",sheet = 1, range = cell_cols("A:AA"), col_types = c("text"))
 
 #lookup
 trip_purpose <-  bind_cols(distinct(stage_0, `Purpose of travel`),
@@ -2293,9 +2295,9 @@ trip$year <- 2011
 trip$gdppc2014 <- 23162
 trip$population2014 <- 1878000
   
-write.csv(trip, "data/local/vizag/visakhapatnam_trip.csv")
+write.csv(trip, "data/local/vizag/vizag_trip.csv")
 
-trip <- read_csv('data/local/vizag/visakhapatnam_trip.csv')
+trip <- read_csv('data/local/vizag/vizag_trip.csv')
 
 # Standardized travel modes
 trip <- standardize_modes(trip, mode = c('trip'))
@@ -2329,13 +2331,13 @@ rm(list =ls())
 source("code/producing_trips_rd/used_functions.R")
 
 #data
-person_0 <- read_csv('V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/Mexico/Travel surveys/Mexico City 2017/Databases/eod_2017_csv/tsdem_eod2017/conjunto_de_datos/tsdem.csv')
-trip_0 <- read_csv('V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/Mexico/Travel surveys/Mexico City 2017/Databases/eod_2017_csv/tviaje_eod2017/conjunto_de_datos/tviaje.csv')
-stage_0 <- read_csv('V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/Mexico/Travel surveys/Mexico City 2017/Databases/eod_2017_csv/ttransporte_eod2017/conjunto_de_datos/ttransporte.csv')
+person_0 <- read_csv('V://Studies//MOVED//HealthImpact//Data//TIGTHAT//Mexico//Travel surveys//Mexico City 2017//Databases//eod_2017_csv//tsdem_eod2017//conjunto_de_datos//tsdem.csv')
+trip_0 <- read_csv('V://Studies//MOVED//HealthImpact//Data//TIGTHAT//Mexico//Travel surveys//Mexico City 2017//Databases//eod_2017_csv//tviaje_eod2017//conjunto_de_datos//tviaje.csv')
+stage_0 <- read_csv('V://Studies//MOVED//HealthImpact//Data//TIGTHAT//Mexico//Travel surveys//Mexico City 2017//Databases//eod_2017_csv//ttransporte_eod2017//conjunto_de_datos//ttransporte.csv')
 
 #lookups
-trip_purpose <- read_excel("V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/Mexico/Travel surveys/Mexico City 2017/Databases/eod_2017_csv/lookup.xlsx",'trip_purpose')
-stage_mode <- read_excel("V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/Mexico/Travel surveys/Mexico City 2017/Databases/eod_2017_csv/lookup.xlsx",'stage_mode')
+trip_purpose <- read_excel("V://Studies//MOVED//HealthImpact//Data//TIGTHAT//Mexico//Travel surveys//Mexico City 2017//Databases//eod_2017_csv//lookup.xlsx",'trip_purpose')
+stage_mode <- read_excel("V://Studies//MOVED//HealthImpact//Data//TIGTHAT//Mexico//Travel surveys//Mexico City 2017//Databases//eod_2017_csv//lookup.xlsx",'stage_mode')
 sex <- bind_cols(sex=c("Male", "Female"), sexo = 1:2)
 
 
@@ -2398,23 +2400,20 @@ trip$age <- as.integer(trip$age)
 # Source functions
 source("code/producing_trips_rd/used_functions.R")
 
-rd <- expand_using_weights(trip, normalize_by = 10)
+# Use unexpanded trip dataset due to file size
+rd <- trip
 
 # Remove extra columns
 rd$X1 <- NULL
 
-rd$participant_id <- as.integer(as.factor(with(rd, paste(cluster_id, household_id, participant_id, pid, sep = "_"))))
+rd$participant_id <- as.integer(as.factor(with(rd, paste(cluster_id, household_id, participant_id, sep = "_"))))
 
-rd$trip_id <- as.integer(as.factor(with(rd, paste(cluster_id, household_id, participant_id, pid, trip_id,  sep = "_"))))
+rd$trip_id <- as.integer(as.factor(with(rd, paste(cluster_id, household_id, participant_id, trip_id,  sep = "_"))))
 
 # Reorder and select columns
 rd1 <- rd %>% dplyr::select(participant_id, age, sex, trip_id, trip_mode, trip_duration, stage_id, stage_mode, stage_duration)
 
-# write
-
-rd2 <- slice_sample(rd1, prop = 0.1)
-
-write_csv(rd2, 'inst/extdata/local/mexico_city/trips_mexico_city.csv')
+write_csv(rd1, 'inst/extdata/local/mexico_city/trips_mexico_city.csv')
 
 ## Message from Ralph: I just shared a dropbox folder with the US (2017) and German (2008) data as requested. 
 ###I followed the codebook you provided. Two items to note: weights are trip weights not not hh weights. 
@@ -2489,13 +2488,13 @@ source("code/producing_trips_rd/used_functions.R")
 library(chron)
 
 #original data
-household_0 <- read_excel("V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/Cape Town/2013 Household Survey Data Sets & Meta Data_RHDHV_230114/Final datasheets_incl metadata_05-12-2013/CT_Household_travel_survey_householdinfo/test.xlsx")
+household_0 <- read_excel("V://Studies//MOVED//HealthImpact//Data//TIGTHAT//Cape Town//2013 Household Survey Data Sets & Meta Data_RHDHV_230114//Final datasheets_incl metadata_05-12-2013//CT_Household_travel_survey_householdinfo//test.xlsx")
 
 
-person_0 <- read_excel("V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/Cape Town/2013 Household Survey Data Sets & Meta Data_RHDHV_230114/Final datasheets_incl metadata_05-12-2013/CT_Household_travel_survey_person info/CT_household_travel_survey_person.xlsx",
+person_0 <- read_excel("V://Studies//MOVED//HealthImpact//Data//TIGTHAT//Cape Town//2013 Household Survey Data Sets & Meta Data_RHDHV_230114//Final datasheets_incl metadata_05-12-2013//CT_Household_travel_survey_person info//CT_household_travel_survey_person.xlsx",
                        range = cell_cols("B:E"))
 
-trip_0 <- read_excel("V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/Cape Town/2013 Household Survey Data Sets & Meta Data_RHDHV_230114/Final datasheets_incl metadata_05-12-2013/CT_Trip diary/CT_household_travel_survey_diary.xlsx",
+trip_0 <- read_excel("V://Studies//MOVED//HealthImpact//Data//TIGTHAT//Cape Town//2013 Household Survey Data Sets & Meta Data_RHDHV_230114//Final datasheets_incl metadata_05-12-2013//CT_Trip diary//CT_household_travel_survey_diary.xlsx",
                      sheet = "Trip Diary_copy")
 
 
@@ -2588,7 +2587,7 @@ rd1 <- rd %>% dplyr::select(participant_id, age, sex, trip_id, trip_mode, trip_d
 write_csv(rd1, 'inst/extdata/local/cape_town/trips_cape_town.csv')
 
 #####Switzerland 2015####
-setwd('V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/Switzerland/MZMV2015_ohne_geo/4_DB_csv/04_DB_CSV')
+setwd('V://Studies//MOVED//HealthImpact//Data//TIGTHAT//Switzerland//MZMV2015_ohne_geo//4_DB_csv//04_DB_CSV')
 stages<-read.csv('etappen.csv')
 stages<-stages[,c("HHNR","ETNR","WEGNR","rdist","e_dauer","f51300","f51700","E_Ausland",'WP')]
 stages$trip_id<- paste(stages$HHNR,stages$WEGNR,sep="")
@@ -2638,7 +2637,7 @@ rm("stages", "person","stages", "trips")
 
 
 #####United States from Ralph#####
-setwd('V:/Studies/MOVED/HealthImpact/Data/TIGTHAT/USA 2017 and German 2008')
+setwd('V://Studies//MOVED//HealthImpact//Data//TIGTHAT//USA 2017 and German 2008')
 US <- read.dta13("NHTS 2017 USA for Rahul.dta")
 US$country<- "USA"
 US$age_cat<-'NA'
