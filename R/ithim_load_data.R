@@ -8,25 +8,26 @@
 #' 
 #' 
 #' @export
-ithim_load_data <- function(setup_call_summary_filename,speeds=list(
-  bus=15,
-  bus_driver=15,
-  minibus=15,
-  minibus_driver=15,
-  car=21,
-  taxi=21,
-  pedestrian=4.8,
-  walk_to_pt=4.8,
-  cycle=14.5,
-  motorcycle=25,
-  truck=21,
-  van=15,
-  subway=28,
-  rail=35,
-  auto_rickshaw=22,
-  shared_auto=22,
-  cycle_rickshaw=10
-)){
+ithim_load_data <- function(setup_call_summary_filename, speeds = 
+  list( bus = 11, 
+        bus_driver = 11, 
+        minibus = 11, 
+        minibus_driver = 11, 
+        car = 14, 
+        taxi = 9, 
+        pedestrian = 3, 
+        walk_to_pt = 3, 
+        cycle = 7, 
+        motorcycle = 14, 
+        truck = 11, 
+        van = 14, 
+        subway = 16, 
+        rail = 20, 
+        auto_rickshaw = 9, 
+        shared_auto = 14, 
+        shared_taxi = 9, 
+        cycle_rickshaw = 5 
+  )){
   ## this function requires path specification, so that it may differ for different case studies
   
   ## these datasets are all global, saved in global folder.
@@ -60,14 +61,6 @@ ithim_load_data <- function(setup_call_summary_filename,speeds=list(
   ## if either trip or stage labels are missing, we copy over from the other.
   filename <- paste0(local_path,"/trips_",CITY,".csv")
   trip_set <- read_csv(filename,col_types = cols())
-
-  # Disable temporary hack   
-  # ### TEMPORARY HACK TO REMOVE ALL DIST COLUMNS
-  # if ('trip_distance' %in% colnames(trip_set))
-  #   trip_set <- trip_set %>% dplyr::select(-c('trip_distance'))
-  # if ('stage_distance' %in% colnames(trip_set))
-  #   trip_set <- trip_set %>% dplyr::select(-c('stage_distance'))
-  
   cat(paste0('\n  Trips read from ',filename,' \n\n'),file=setup_call_summary_filename,append=T)
   trip_set$participant_id <- as.numeric(as.factor(trip_set$participant_id))
   ## copy over as required

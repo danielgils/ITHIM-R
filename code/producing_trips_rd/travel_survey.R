@@ -85,20 +85,22 @@ trip <- read_csv('data/local/buenos_aires/buenos_aires_trip.csv')
 trip <- standardize_modes(trip, mode = c('stage', 'trip'))
 
 # Expand by household IDs
-rd <- expand_using_weights(trip, normalize_by = 20)
+# rd <- expand_using_weights(trip, normalize_by = 20)
+rd <- trip
 
-# Reduce filesize by slicing it to 10%
-rd <- slice_sample(rd, prop = 0.1)
+# # Reduce filesize by slicing it to 10%
+# rd <- slice_sample(rd, prop = 0.1)
 
 # Remove extra columns
 rd$X1 <- NULL
 
-rd$participant_id <- as.integer(as.factor(with(rd, paste(cluster_id, household_id, participant_id, pid, sep = "_"))))
+rd$participant_id <- as.integer(as.factor(with(rd, paste(cluster_id, household_id, participant_id, sep = "_"))))
 
-rd$trip_id <- as.integer(as.factor(with(rd, paste(cluster_id, household_id, participant_id, pid, trip_id,  sep = "_"))))
+rd$trip_id <- as.integer(as.factor(with(rd, paste(cluster_id, household_id, participant_id, trip_id,  sep = "_"))))
 
 # Reorder and select columns
-rd1 <- rd %>% dplyr::select(participant_id, age, sex, trip_id, trip_mode, trip_duration, stage_id, stage_mode, stage_duration)
+rd1 <- rd %>% dplyr::select(participant_id, age, sex, trip_id, trip_mode, trip_duration,  
+                            stage_id, stage_mode, stage_duration)
 
 write_csv(rd1, 'inst/extdata/local/buenos_aires/trips_buenos_aires.csv')
 
@@ -1015,8 +1017,12 @@ trip <- setdiff(trip_0, no_trip) %>%
            participant_wt = FE_PESS,
            age = IDADE, 
            trip_id = N_VIAG,
-           trip_duration = DURACAO) %>% 
-    select(cluster_id, household_id, participant_id, participant_wt, age, sex, trip_id, trip_purpose, trip_mode, trip_duration,trip_distance, stage_id, stage_mode)
+           trip_duration = DURACAO,
+           walk_to_pt = ANDA_O,
+           walk_from_pt = ANDA_D) %>% 
+  select(cluster_id, household_id, participant_id, participant_wt, age, sex, trip_id, trip_purpose, trip_mode, trip_duration,walk_to_pt, walk_from_pt, trip_distance, stage_id, stage_mode)
+
+
 
 trip$year <- 2012
 trip$gdppc2014 <- 20650
@@ -1738,21 +1744,21 @@ write.csv(trip, "data/local/bogota/bogota_trip.csv")
 trip <- read_csv('data/local/bogota/bogota_trip.csv')
 
 # Standardized travel modes
-trip <- standardize_modes(trip, mode = c('stage', 'trip'))
+rd <- standardize_modes(trip, mode = c('stage', 'trip'))
 
-rd <- trip
+# rd <- trip
 
 # Remove extra columns
 rd$X1 <- NULL
 
 rd$participant_id <- as.integer(as.factor(with(rd, paste(cluster_id, household_id, participant_id, sep = "_"))))
 
-rd$trip_id <- as.integer(as.factor(with(rd, paste(cluster_id, household_id, participant_id, trip_id,  sep = "_"))))
+rd$trip_id <- as.integer(as.factor(with(rd, paste(cluster_id, household_id, participant_id, trip_id, sep = "_"))))
 
 # Reorder and select columns
 rd1 <- rd %>% dplyr::select(participant_id, age, sex, trip_id, trip_mode, trip_duration, stage_id, stage_mode)
 # 
-write_csv(rd1, 'inst/extdata/local/bogota/trips_bogota.csv')
+write_csv(rd, 'inst/extdata/local/bogota/trips_bogota.csv')
 
 #quality_check(trip)
 #trip %>% filter(!is.na(trip_id) & is.na(trip_mode)) %>% View()
@@ -2170,8 +2176,6 @@ for(i in 2:nrow(person)){
 }
 
 
-
-
 stage <- stage_0 %>% 
     mutate(x = `Transfer time in Min     (Walk time+wait time for next mode)`,
            duration = ifelse(grepl("E-",x), as.numeric(x)*1440,x),
@@ -2305,17 +2309,12 @@ trip <- standardize_modes(trip, mode = c('trip'))
 # rd <- expand_using_weights(trip)
 rd <- trip
 
-# Expand dataset by trip_wkly_frequency
-# Add trip and stage id
-rd <- rd %>% mutate(trip_wkly_frequency = if_else(is.na(trip_wkly_frequency), 1, trip_wkly_frequency)) %>% uncount(trip_wkly_frequency, .id = "tid") %>% 
-  mutate(trip_id = as.integer(rownames(.)))
-
 # Remove extra columns
 rd$X1 <- NULL
 
 rd$participant_id <- as.integer(as.factor(with(rd, paste(cluster_id, household_id, participant_id, sep = "_"))))
 
-rd$trip_id <- as.integer(as.factor(with(rd, paste(cluster_id, household_id, participant_id, trip_id, tid, sep = "_"))))
+rd$trip_id <- as.integer(as.factor(with(rd, paste(cluster_id, household_id, participant_id, trip_id, sep = "_"))))
 
 # Reorder and select columns
 rd1 <- rd %>% dplyr::select(participant_id, age, sex, trip_id, trip_mode, trip_duration, trip_distance)
@@ -2400,7 +2399,6 @@ trip$age <- as.integer(trip$age)
 # Source functions
 source("code/producing_trips_rd/used_functions.R")
 
-# Use unexpanded trip dataset due to file size
 rd <- trip
 
 # Remove extra columns
@@ -2411,9 +2409,9 @@ rd$participant_id <- as.integer(as.factor(with(rd, paste(cluster_id, household_i
 rd$trip_id <- as.integer(as.factor(with(rd, paste(cluster_id, household_id, participant_id, trip_id,  sep = "_"))))
 
 # Reorder and select columns
-rd1 <- rd %>% dplyr::select(participant_id, age, sex, trip_id, trip_mode, trip_duration, stage_id, stage_mode, stage_duration)
+rd <- rd %>% dplyr::select(participant_id, age, sex, trip_id, trip_mode, trip_duration, stage_id, stage_mode, stage_duration)
 
-write_csv(rd1, 'inst/extdata/local/mexico_city/trips_mexico_city.csv')
+write_csv(rd, 'inst/extdata/local/mexico_city/trips_mexico_city.csv')
 
 ## Message from Ralph: I just shared a dropbox folder with the US (2017) and German (2008) data as requested. 
 ###I followed the codebook you provided. Two items to note: weights are trip weights not not hh weights. 
