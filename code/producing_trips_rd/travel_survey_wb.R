@@ -434,7 +434,7 @@ options(scipen = 50)
 # In tsdem, edad = 99 means "Edad no especificada"
 
 # Import datasets
-route <- "C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/Data/Mexico/MexicoCity/Microdatos/CSV/"
+route <- "C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/Data/Mexico/MexicoCity/Encuesta2017/Microdatos/CSV/"
 
 vivienda <- read_csv(paste0(route, "tvivienda_eod2017/conjunto_de_datos/tvivienda.csv"))
 hogar <- read_csv(paste0(route, "thogar_eod2017/conjunto_de_datos/thogar.csv"))
@@ -508,14 +508,16 @@ trips %>% filter(p5_3 == 1 & !p5_7_7 %in% c("09", "99")) %>% # Filter trips duri
 # weekdays and saturdays. So I have to filter trips in weekdays, otherwise I
 # would be counting more trips for people that did trips on both days to a 
 # single day. Example id_soc = 1327
-# Filter weekdays trips
-# trips <- trips %>% filter(p5_3 == 1)
-# stages <- stages %>% filter(p5_3 == 1)
 
-# Checking the number of trips in both datasets
+# Filter weekdays trips
+trips <- trips %>% filter(p5_3 == 1)
+stages <- stages %>% filter(p5_3 == 1)
+
+# Check the number of trips in both datasets
 # length(unique(trips$id_via)) == nrow(trips) # ok
 # length(unique(trips$id_via)) == length(unique(stages$id_via)) # ok
-names(trips)
+
+# Create new variables
 stages2 <- stages %>% 
   left_join(trips[, c("id_soc", "id_via")], by = "id_via") %>% 
   mutate(participant_id = id_soc,
@@ -528,6 +530,36 @@ stages2 <- stages %>%
                                  NA),
          stage_mode = main_mode$ITHIM[
            match(p5_14, main_mode$Codigo)],
+         stage_hierarchy = main_mode$Jerarquia[
+           match(p5_14, main_mode$Codigo)],
          sex = ifelse(sexo == 1, "male", "female"),
          age = edad)
-View(tail(stages2))
+#View(tail(stages2))
+
+# Compute trip duration and trip mode from stages dataset
+trip_info <- stages2 %>% group_by(trip_id) %>% 
+  summarise(trip_duration = sum(stage_duration, na.rm = T),
+            min_mode = min(stage_hierarchy),
+            trip_mode = main_mode$ITHIM[
+              match(min_mode, main_mode$Jerarquia)])
+#View(head(trip_info,20))
+
+# Paste trip information to stages
+stages2 <- stages2 %>% left_join(trip_info, by = "trip_id")
+
+# Checking some variables
+#length(unique(trips$id_soc)) == length(unique(stages2$participant_id)) # Same number of people
+#length(unique(trips$id_via)) == length(unique(stages2$trip_id)) # Same number of trips
+#table(stages2$sexo, stages2$sex)
+
+
+# Standardized travel modes
+stages3 <- standardize_modes(stages2, mode = c('trip', 'stage'))
+names(stages3)
+rd <- stages3 %>% select(participant_id, age, sex, trip_id, trip_mode,
+                      trip_duration, stage_id, stage_mode, stage_duration)
+
+# Export
+write_csv(rd, 'inst/extdata/local/mexico_city_wb/trips_mexico_city_wb.csv')
+write_csv(rd, 'C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/Data/Mexico/MexicoCity/Cleaned/trips_mexico_city_wb.csv')
+write_csv(rd, 'data/local/mexico_city_wb/trips_mexico_city_wb.csv')
