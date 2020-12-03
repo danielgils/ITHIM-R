@@ -264,7 +264,8 @@ trip <- read_csv('data/local/medellin_wb/medellin_wb_trip.csv')
 # Standardized travel modes
 trip <- standardize_modes(trip, mode = c('trip'))
 
-rd <- trip %>% select(participant_id, age, sex, trip_id, trip_mode, trip_duration)
+rd <- trip %>% select(participant_id, age, sex, trip_id, trip_mode,
+                      trip_duration)
 
 # Export
 write_csv(rd, 'inst/extdata/local/medellin_wb/trips_medellin_wb.csv')
@@ -514,5 +515,19 @@ trips %>% filter(p5_3 == 1 & !p5_7_7 %in% c("09", "99")) %>% # Filter trips duri
 # Checking the number of trips in both datasets
 # length(unique(trips$id_via)) == nrow(trips) # ok
 # length(unique(trips$id_via)) == length(unique(stages$id_via)) # ok
-View(head(stages, 20))
-
+names(trips)
+stages2 <- stages %>% 
+  left_join(trips[, c("id_soc", "id_via")], by = "id_via") %>% 
+  mutate(participant_id = id_soc,
+         trip_id = id_via,
+         stage_id = id_tra,
+         p5_16_1_1 = as.numeric(p5_16_1_1),
+         p5_16_1_2 = as.numeric(p5_16_1_2),
+         stage_duration = ifelse(p5_16_1_1 != 99, 
+                                 (p5_16_1_1 * 60) + p5_16_1_2,
+                                 NA),
+         stage_mode = main_mode$ITHIM[
+           match(p5_14, main_mode$Codigo)],
+         sex = ifelse(sexo == 1, "male", "female"),
+         age = edad)
+View(tail(stages2))
