@@ -2,6 +2,7 @@
 # Last update: September 2020
 
 library(foreign) 
+library(RODBC)
 
 ####Bogota - Colombia (WB) ####
 rm(list = ls())
@@ -164,6 +165,10 @@ trip <- standardize_modes(trip, mode = c('trip'))
 names(trip)
 rd <- trip %>% select(participant_id, age, sex, trip_id, trip_mode, trip_duration)
 
+rd$year <- "2019"
+rd$gdppc2014 <- 17497
+rd$population2014 <- 9135800
+
 # Export
 write_csv(rd, 'inst/extdata/local/bogota_wb2/trips_bogota_wb2.csv')
 write_csv(rd, 'C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/Data/Colombia/Bogota/Cleaned/trips_bogota_wb2.csv')
@@ -266,6 +271,12 @@ trip <- standardize_modes(trip, mode = c('trip'))
 
 rd <- trip %>% select(participant_id, age, sex, trip_id, trip_mode,
                       trip_duration)
+
+# This data needs an update
+rd$year <- "2017"
+rd$gdppc2014 <- 18998 # https://aqtr.com/association/actualites/medellin-road-becoming-knowledge-economy
+# Population of the whole valle de aburra
+rd$population2014 <- 3591963 #https://en.wikipedia.org/wiki/The_Metropolitan_Area_of_the_Aburr%C3%A1_Valley 
 
 # Export
 write_csv(rd, 'inst/extdata/local/medellin_wb/trips_medellin_wb.csv')
@@ -408,6 +419,11 @@ trips4 <- standardize_modes(trips3, mode = c('trip'))
 
 rd <- trips4 %>% select(participant_id, age, sex, trip_id, trip_mode, trip_duration)
 
+# This data needs an update
+rd$year <- "2015"
+rd$gdppc2014 <- 11111 
+rd$population2014 <- 11111 
+
 # Export
 write_csv(rd, 'inst/extdata/local/cali_wb/trips_cali_wb.csv')
 write_csv(rd, 'C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/Data/Colombia/Cali/Cleaned/trips_cali_wb.csv')
@@ -426,10 +442,10 @@ rm(list = ls())
 source("code/producing_trips_rd/used_functions.R")
 options(scipen = 50)
 
-# Notes (first approach to dataset by hand on excel)
+# Notes (first approach to datasets by hand on excel)
 # In tvivieda.csv, variable "ent" = 9 is Mexico city, comparing the sum of the 
-# factor and comparing it with resultados_eod_2017.pdf. "ent" = 15 or 13 corresponds
-# to "Municipios conurbados del estado de Mexico y Tizayuca"
+# factor and comparing it with resultados_eod_2017.pdf. "ent" = 15 or 13
+# corresponds to "Municipios conurbados del estado de Mexico y Tizayuca"
 # Same applies to thogar.csv and tsdem.csv
 # In tsdem, edad = 99 means "Edad no especificada"
 
@@ -559,7 +575,51 @@ names(stages3)
 rd <- stages3 %>% select(participant_id, age, sex, trip_id, trip_mode,
                       trip_duration, stage_id, stage_mode, stage_duration)
 
+# From Lambed
+rd$year <- 2017
+rd$gdppc2014 <- 19239
+rd$population2014 <- 20976700 
+
 # Export
 write_csv(rd, 'inst/extdata/local/mexico_city_wb/trips_mexico_city_wb.csv')
 write_csv(rd, 'C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/Data/Mexico/MexicoCity/Cleaned/trips_mexico_city_wb.csv')
 write_csv(rd, 'data/local/mexico_city_wb/trips_mexico_city_wb.csv')
+
+
+#### Santiago - Chile (WB) ####
+rm(list = ls())
+source("code/producing_trips_rd/used_functions.R")
+options(scipen = 50)
+
+# Notes (first approach to dataset by hand on excel)
+# In tvivieda.csv, variable "ent" = 9 is Mexico city, comparing the sum of the 
+# factor and comparing it with resultados_eod_2017.pdf. "ent" = 15 or 13 corresponds
+# to "Municipios conurbados del estado de Mexico y Tizayuca"
+# Same applies to thogar.csv and tsdem.csv
+# In tsdem, edad = 99 means "Edad no especificada"
+
+# Import datasets
+# Before Importing here I exported all tables to csv files because of access 
+# issues with 32 bits.
+route <- "C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/Data/Chile/Santiago/Trips/CSV/"
+
+hogar <- read_xlsx(paste0(route, "Hogar.xlsx"))
+personas <- read_xlsx(paste0(route, "Persona.xlsx"))
+trips <- read_xlsx(paste0(route, "Viaje.xlsx"))
+stages <- read_xlsx(paste0(route, "Etapa.xlsx"))
+
+#---- 
+# (No need to run)
+## Replicating some results to be sure about how to use these datasets
+## Comparing everything with "WorldBank\Data\Chile\Santiago\Trips\Reports\Actualizacion_recolecc_STU_Santiago_IX Etapa_EOD Stgo 2012_Inf_Final vol 2.pdf"
+# Hogar
+sum(hogar$Factor) # Ok same as pag 55, tabla 17 
+
+# Personas
+sum(personas$Factor) # Ok same as pag 55, tabla 17 
+
+# Trips
+# Definition of trip_mode is in pag 74
+sum(trips$FactorFindesemanaEstival, na.rm = T)
+
+# Stages
