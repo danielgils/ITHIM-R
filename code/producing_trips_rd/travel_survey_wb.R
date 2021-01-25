@@ -126,7 +126,7 @@ sum(n_trips_15_bog$suma) # This is NOT the same as mentioned in page 83, paragra
 # This hierarchy is in page 126, table 4.4 of the same document
 # ToDo: Talk to cambridge about the translation, specifically about cable and informal modes
 # Definition and pictures of modes are in "...\WorldBank\Data\Colombia\Bogota\Encuesta de Movilidad 2019\Formularios\190219_Tarjetas 4-6_DPR_.pdf"
-main_mode <- read_excel("C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/Data/Colombia/Jerarquia.xlsx", sheet = "Bogota")
+main_mode <- read_excel("C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/Data/Colombia/Hierarchy.xlsx", sheet = "Bogota")
 
 # Selecting variables I need in personas and hogar
 personas2 <- personas %>%  select(id_hogar, id_persona, p4_edad, Sexo)

@@ -1,0 +1,67 @@
+---
+title: "Preprocessing of Bogota's travel dataset"
+author: "Daniel"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Documentation
+Documentation and final report are located in ".../Colombia/Bogota/Encuesta de Movilidad 2019/Informes de Indicadores"
+
+## Replicate main results from raw datasets
+The first step consists in replicate some results from the final report so we can make sure that we are using these datasets correctly
+
+```{r setup, include=FALSE}
+# Loading libraries
+#+ libraries, warning=FALSE
+library(foreign) 
+library(RODBC)
+
+# Cleaning workspace
+rm(list = ls())
+
+#' To create this report I have to set the full route of each files, regardless
+#' the location of *this* file and the working directory
+# Loading standardize_modes function
+external_route <- "C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/ITHIM-R/code/producing_trips_rd/"
+#external_route <- "CAMBRIDGE_ROUTE V DRIVE"
+source(paste0(external_route, "used_functions.R"))
+
+# Printing options
+options(scipen = 50)
+
+#+ importing, warning=FALSE
+#' Importing datasets
+route <- "C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/Data/Colombia/Bogota/Encuesta de Movilidad 2019/BD EODH2019 FINAL v14022020/Archivos XLSX/"
+hh <- read_excel(paste0(route, "HogaresEODH2019.xlsx")) # hh: Households
+people <- read_excel(paste0(route, "PersonasEODH2019.xlsx"))
+#vehiculos <- read_excel(paste0(route, "VehículosEODH2019.xlsx"))
+#trips <- read_excel(paste0(route, "ViajesEODH2019.xlsx"))
+# In etapa_viaje there's the informatio of Walk_to_pt
+#stages <- read_excel(paste0(route, "EtapasEODH2019.xlsx"))
+
+# According to the documentation they defined a hierarchy between modes to
+# define the main mode of each trip. This hierarchy is in page 126, table 4.4
+# The resulting table with main mode and duration calculated in this dataset:
+#duracion <- read_excel("C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/Data/Colombia/Bogota/Encuesta de Movilidad 2019/BD EODH2019 FINAL v14022020/Archivos XLSX/Aux_DuraciónEODH2019.xlsx")
+
+# The number of rows of these datasets is the same to what is mentioned in page
+# 210 of the document ".../Informes de Indicadores/200109_Etapa_V_v3_Caracterización de la Movilidad.pdf"
+
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
