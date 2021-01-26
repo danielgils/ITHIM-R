@@ -11,7 +11,7 @@
 #+ warning=FALSE, message=FALSE, echo=FALSE
 # Loading libraries
 library(foreign) 
-library(RODBC)
+#library(RODBC)
 library(kableExtra)
 library(readxl)
 library(tidyverse)
@@ -24,7 +24,11 @@ rm(list = ls())
 options(scipen = 50)
 
 #' ## Documentation
-#' Documentation is located in ".../Colombia/Bogota/Encuesta de Movilidad 2019/". From now on: 
+#' Documentation is located in ".../Colombia/Bogota/Encuesta de Movilidad 2019/".
+#' These files were sent by the team from Mobility Secretariat of Bogota, but
+#' can also be found here: https://www.simur.gov.co/portal-simur/datos-del-sector/encuestas-de-movilidad/.
+#'
+#' From now on: 
 #+ warning=FALSE, message=FALSE, echo=FALSE
 data.frame(
   Reference = c("File1", "File2", "File3", "File4"),
@@ -48,8 +52,8 @@ data.frame(
 #' Definition of trip in page 120 of **File2**: *Move from one part to another made by one person with a specific reason/motive, A definite hour of start and end, a mode of transport, and a duration greater than 3 minutes. Or a move from one part to another with reason/motive work or study of any duration.*
 #' 
 #' 2. *Collection:* Trips collected in this survey correspond to those made the 
-#' day of reference, i.e., the day before the survey. **Results presented are 
-#' for trips made in a single day.**
+#' day of reference, i.e., the day before the survey. **Results presented are** 
+#' **for trips made in a single day.**
 #' 
 #' 
 #' ## Replicate main results from raw datasets
@@ -62,8 +66,9 @@ external_route <- "C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBa
 #external_route <- "CAMBRIDGE_ROUTE V DRIVE"
 #source(paste0(external_route, "used_functions.R")) 
 
-#' It didn't work with knitr so I had to paste it here. Before running this
-#' script, make sure this function is up to date
+#' It didn't work with knitr so I had to paste this function here. 
+#' 
+#' **Note: Before running this script, make sure this function is up to date**
 standardize_modes <- function(trip, mode){
   # Read lookup table
   smodes <- read_csv('C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/ITHIM-R/data/global/modes/standardized_modes.csv')
@@ -231,8 +236,8 @@ mode_share$proportion <- mode_share$suma /
 mode_share %>% arrange(desc(proportion)) %>% 
   kbl() %>% kable_classic(full_width = F)
 #' Results are the same.
-
-#' #### **To Do**: Check in other cities the definition of a trip. Here I can use
+#' 
+#'  **To Do**: Check in other cities the definition of a trip. Here I can use
 #' the dataset filtering walking trips longer than 15 minutes or use the complete
 #' dataset ignoring this filter.
 #' 
@@ -240,7 +245,7 @@ mode_share %>% arrange(desc(proportion)) %>%
 #' # **Preprocessing phase**
 #' ## Filtering Bogota trips only
 #' Since the survey was conducted in 29 municipalities and we are only interested
-#' in Bogota, then these trips are the only ones used.
+#' in Bogota, then these trips are the only ones used. 
 #' **Note**: I am using here all trips regardless of walking trips shorter than 
 #' 15 minutes. 
 #' 
@@ -271,9 +276,9 @@ main_mode %>% kbl() %>% kable_classic()
 
 #' The first two columns of this table have been defined in the documentation,
 #' so I created the new classification (in Spanish) and its equivalence to Ithim,
-#' taking into account travel modes defined in standardized_modes file (...\ITHIM-R\data\global\modes\standardized_modes.csv)
+#' taking into account travel modes defined in standardized_modes file (.../ITHIM-R/data/global/modes/standardized_modes.csv)
 #' 
-#' **Note**:Definition and pictures of modes are in **File3**.
+#' **Note**: Definition and pictures of modes are in **File3**.
 #'
 #' ## Information at stage or trip level?
 #' There is information at stage level although it seems that is not enough 
@@ -306,7 +311,7 @@ stages_bogota %>% filter(id_hogar == "1117", id_persona == "2",
          p19_camino_minutos, p21_tiempo_arrancar_vehic) %>% 
   kbl() %>% kable_classic()
   
-#' From the both datasets I can see that the person started her trip at 6:30, 
+#' From both datasets I can see that the person started her trip at 6:30, 
 #' then she had to walk for 5 minutes, to take the Bus 
 #' (p18_id_medio_transporte = 4) where she had to wait 20 min. for it. Then she 
 #' walked 5 minutes to take the Transmilenio where she had to wait 12 min. for it
@@ -351,6 +356,13 @@ stages_bogota %>% filter(id_hogar == "12801", id_persona == "2",
 #' **For this reason I conclude that even though there's information at stage**
 #' **level, it's not enough to get the duration for each stage. Therefore,**
 #' **I will continue working at trip level**.
+#' 
+#' **ToDo: since the proportion of trips with more than one stage is relatively**
+#' **small, we could compute the difference between the trip duration and the**
+#' **time spent walking to the PT, and then split this duration equally in the**
+#' **remaining modes. In this way, we used all information provided for trips**
+#' **with only one stage and have a rough estimate of duration for trips with**
+#' **more than one stage.**
 #' 
 #' ## Row for each trip, translate trip_mode and create duration, sex and age
 #' Since trips and duration datasets have the same information, I take duration
@@ -401,7 +413,6 @@ sum(is.na(duration_bogota$trip_mode))
 trips_export <- standardize_modes(duration_bogota, mode = c('trip'))
 unique(duration_bogota$trip_mode)
 unique(trips_export$trip_mode)
-
 #' 
 #' *standardize_modes* function converts bicycle to cycle, train to rail, and 
 #' rickshaw to auto_rickshaw.
