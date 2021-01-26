@@ -13,6 +13,9 @@
 library(foreign) 
 library(RODBC)
 library(kableExtra)
+library(readxl)
+library(tidyverse)
+
 
 # Cleaning workspace
 rm(list = ls())
@@ -39,6 +42,16 @@ data.frame(
            "Formularios/190220_Módulo D_DPR (viajes).pdf")
 ) %>% kbl() %>% kable_classic()
 
+#' ## Definition of a trip
+#' 1. *Trip:* All trips that are longer than 3 minutes for all modes except
+#' walking, where trips should be longer or equal to 15 minutes. 
+#' Definition of trip in page 120 of **File2**: *Move from one part to another made by one person with a specific reason/motive, A definite hour of start and end, a mode of transport, and a duration greater than 3 minutes. Or a move from one part to another with reason/motive work or study of any duration.*
+#' 
+#' 2. *Collection:* Trips collected in this survey correspond to those made the 
+#' day of reference, i.e., the day before the survey. **Results presented are 
+#' for trips made in a single day.**
+#' 
+#' 
 #' ## Replicate main results from raw datasets
 #' To create this report I have to set the full route of each file, regardless
 #' the location of the working directory.
@@ -223,15 +236,7 @@ mode_share %>% arrange(desc(proportion)) %>%
 #' the dataset filtering walking trips longer than 15 minutes or use the complete
 #' dataset ignoring this filter.
 #' 
-#' ## Definition of a trip
-#' 1. *Trip:* All trips that are longer than 3 minutes for all modes except
-#' walking, where trips should be longer or equal to 15 minutes. 
-#' Definition of trip in page 120 of **File2**: *Move from one part to another made by one person with a specific reason/motive, A definite hour of start and end, a mode of transport, and a duration greater than 3 minutes. Or a move from one part to another with reason/motive work or study of any duration.*
-#' 
-#' 2. *Collection:* Trips collected in this survey correspond to those made the 
-#' day of reference, i.e., the day before the survey. **Results presented are 
-#' for trips made in a single day.**
-#' 
+#'
 #' # **Preprocessing phase**
 #' ## Filtering Bogota trips only
 #' Since the survey was conducted in 29 municipalities and we are only interested
@@ -397,12 +402,20 @@ trips_export <- standardize_modes(duration_bogota, mode = c('trip'))
 unique(duration_bogota$trip_mode)
 unique(trips_export$trip_mode)
 
+#' 
+#' *standardize_modes* function converts bicycle to cycle, train to rail, and 
+#' rickshaw to auto_rickshaw.
+#'
+#'
+#' # **Exporting phase**
+#' ## Variables to export
 #' Now I filter the columns I need
 trips_export <- trips_export %>% 
   select(participant_id, age, sex, trip_id, trip_mode, trip_duration)
 
 #' ## Export dataset
-#' I'm exporting this dataset to three different locations.
+#' I'm exporting this dataset to three different locations:
+#' 
 #' 1. In .../inst/exdata folder so the dataset is installed with the package
 #' 2. In Data/Colombia/Bogota/Cleaned, to have a copy 
 #' 3. in data/local/bogota_wb to export the dataset with the variables for the

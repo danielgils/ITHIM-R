@@ -11,7 +11,7 @@
 
 <meta name="author" content="Daniel" />
 
-<meta name="date" content="2021-01-25" />
+<meta name="date" content="2021-01-26" />
 
 <title>Preprocessing of Bogota’s travel dataset</title>
 
@@ -1707,7 +1707,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">Preprocessing of Bogota’s travel dataset</h1>
 <h4 class="author">Daniel</h4>
-<h4 class="date">2021-01-25</h4>
+<h4 class="date">2021-01-26</h4>
 
 </div>
 
@@ -1794,6 +1794,13 @@ Formularios/190220_Módulo D_DPR (viajes).pdf
 </tbody>
 </table>
 </div>
+<div id="definition-of-a-trip" class="section level2">
+<h2>Definition of a trip</h2>
+<ol style="list-style-type: decimal">
+<li><p><em>Trip:</em> All trips that are longer than 3 minutes for all modes except walking, where trips should be longer or equal to 15 minutes. Definition of trip in page 120 of <strong>File2</strong>: <em>Move from one part to another made by one person with a specific reason/motive, A definite hour of start and end, a mode of transport, and a duration greater than 3 minutes. Or a move from one part to another with reason/motive work or study of any duration.</em></p></li>
+<li><p><em>Collection:</em> Trips collected in this survey correspond to those made the day of reference, i.e., the day before the survey. <strong>Results presented are for trips made in a single day.</strong></p></li>
+</ol>
+</div>
 <div id="replicate-main-results-from-raw-datasets" class="section level2">
 <h2>Replicate main results from raw datasets</h2>
 <p>To create this report I have to set the full route of each file, regardless the location of the working directory.</p>
@@ -1801,7 +1808,7 @@ Formularios/190220_Módulo D_DPR (viajes).pdf
 <pre class="r"><code>external_route &lt;- &quot;C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/ITHIM-R/code/producing_trips_rd/&quot;
 #external_route &lt;- &quot;CAMBRIDGE_ROUTE V DRIVE&quot;
 #source(paste0(external_route, &quot;used_functions.R&quot;)) </code></pre>
-<p>It didn’t work with knitr so I had to paste it here</p>
+<p>It didn’t work with knitr so I had to paste it here. Before running this script, make sure this function is up to date</p>
 <pre class="r"><code>standardize_modes &lt;- function(trip, mode){
   # Read lookup table
   smodes &lt;- read_csv(&#39;C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/ITHIM-R/data/global/modes/standardized_modes.csv&#39;)
@@ -1811,13 +1818,13 @@ Formularios/190220_Módulo D_DPR (viajes).pdf
   smodes &lt;- smodes %&gt;% 
     mutate(across(where(is.character), str_trim))
   
-  if (length(mode) == 1){
+  if (length(mode) == 1) {
     if (mode == &#39;stage&#39;)
       trip$stage_mode &lt;- smodes$exhaustive_list[match(trip$stage_mode, smodes$original)]
     else
       trip$trip_mode &lt;- smodes$exhaustive_list[match(trip$trip_mode, smodes$original)]
-  }else if (length(mode) == 2){
-    if (all(mode %in% c(&#39;stage&#39;, &#39;trip&#39;))){
+  }else if (length(mode) == 2) {
+    if (all(mode %in% c(&#39;stage&#39;, &#39;trip&#39;))) {
       trip$trip_mode &lt;- smodes$exhaustive_list[match(trip$trip_mode, smodes$original)]
       trip$stage_mode &lt;- smodes$exhaustive_list[match(trip$stage_mode, smodes$original)]
     }
@@ -3853,13 +3860,6 @@ Cable
 <p>Results are the same. #### <strong>To Do</strong>: Check in other cities the definition of a trip. Here I can use the dataset filtering walking trips longer than 15 minutes or use the complete dataset ignoring this filter.</p>
 </div>
 </div>
-<div id="definition-of-a-trip" class="section level2">
-<h2>Definition of a trip</h2>
-<ol style="list-style-type: decimal">
-<li><p><em>Trip:</em> All trips that are longer than 3 minutes for all modes except walking, where trips should be longer or equal to 15 minutes. Definition of trip in page 120 of <strong>File2</strong>: <em>Move from one part to another made by one person with a specific reason/motive, A definite hour of start and end, a mode of transport, and a duration greater than 3 minutes. Or a move from one part to another with reason/motive work or study of any duration.</em></p></li>
-<li><p><em>Collection:</em> Trips collected in this survey correspond to those made the day of reference, i.e., the day before the survey. <strong>Results presented are for trips made in a single day.</strong></p></li>
-</ol>
-</div>
 </div>
 <div id="preprocessing-phase" class="section level1">
 <h1><strong>Preprocessing phase</strong></h1>
@@ -5076,13 +5076,25 @@ duration_bogota &lt;- duration_bogota %&gt;%
 <pre><code>## [1] &quot;bus&quot;           &quot;car&quot;           &quot;pedestrian&quot;    &quot;motorcycle&quot;   
 ## [5] &quot;cycle&quot;         &quot;taxi&quot;          &quot;rail&quot;          &quot;auto_rickshaw&quot;
 ## [9] &quot;other&quot;</code></pre>
+<p><em>standardize_modes</em> function converts bicycle to cycle, train to rail, and rickshaw to auto_rickshaw.</p>
+</div>
+</div>
+<div id="exporting-phase" class="section level1">
+<h1><strong>Exporting phase</strong></h1>
+<div id="variables-to-export" class="section level2">
+<h2>Variables to export</h2>
 <p>Now I filter the columns I need</p>
 <pre class="r"><code>trips_export &lt;- trips_export %&gt;% 
   select(participant_id, age, sex, trip_id, trip_mode, trip_duration)</code></pre>
 </div>
 <div id="export-dataset" class="section level2">
 <h2>Export dataset</h2>
-<p>I’m exporting this dataset to three different locations. 1. In …/inst/exdata folder so the dataset is installed with the package 2. In Data/Colombia/Bogota/Cleaned, to have a copy 3. in data/local/bogota_wb to export the dataset with the variables for the quick report. In this case I called it bogota_wb2, because Lady made the preprocessing of this dataset before, and I don’t want to lose it. Lady’s datset are bogota_Wb.</p>
+<p>I’m exporting this dataset to three different locations:</p>
+<ol style="list-style-type: decimal">
+<li>In …/inst/exdata folder so the dataset is installed with the package</li>
+<li>In Data/Colombia/Bogota/Cleaned, to have a copy</li>
+<li>in data/local/bogota_wb to export the dataset with the variables for the quick report. In this case I called it bogota_wb2, because Lady made the preprocessing of this dataset before, and I don’t want to lose it. Lady’s datset are bogota_Wb.</li>
+</ol>
 <pre class="r"><code>write_csv(trips_export, &#39;C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/ITHIM-R/inst/extdata/local/bogota_wb2/trips_bogota_wb2.csv&#39;)
 write_csv(trips_export, &#39;C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/Data/Colombia/Bogota/Cleaned/trips_bogota_wb2.csv&#39;)
 write_csv(trips_export, &#39;C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/ITHIM-R/data/local/bogota_wb2/trips_bogota_wb2.csv&#39;)</code></pre>
