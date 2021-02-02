@@ -17,8 +17,9 @@ library(readxl)
 library(tidyverse)
 
 
+#+ warning=FALSE, message=FALSE, echo=FALSE
 # Cleaning workspace
-rm(list = ls())
+rm(list = ls());gc()
 
 # Printing options
 options(scipen = 50)
@@ -49,7 +50,7 @@ data.frame(
 #' ## Definition of a trip
 #' 1. *Trip:* All trips that are longer than 3 minutes for all modes except
 #' walking, where trips should be longer or equal to 15 minutes. 
-#' Definition of trip in page 120 of **File2**: *Move from one part to another made by one person with a specific reason/motive, A definite hour of start and end, a mode of transport, and a duration greater than 3 minutes. Or a move from one part to another with reason/motive work or study of any duration.*
+#' Definition of trip in page 120 of **File2**: *Movement from one part to another made by one person with a specific reason/motive, A definite hour of start and end, a mode of transport, and a duration greater than 3 minutes. Or a movement from one part to another with reason/motive work or study of any duration.*
 #' 
 #' 2. *Collection:* Trips collected in this survey correspond to those made the 
 #' day of reference, i.e., the day before the survey. **Results presented are** 

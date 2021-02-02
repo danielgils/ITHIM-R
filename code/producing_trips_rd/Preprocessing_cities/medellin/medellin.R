@@ -16,8 +16,9 @@ library(readxl)
 library(tidyverse)
 library(chron) #To convert chr to date
 
+#+ warning=FALSE, message=FALSE, echo=FALSE
 # Cleaning workspace
-rm(list = ls())
+rm(list = ls());gc()
 
 # Printing options
 options(scipen = 50)
@@ -326,6 +327,6 @@ trips_export <- trips_export %>%
 #' quick report. 
 write_csv(trips_export, 'C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/ITHIM-R/inst/extdata/local/medellin_wb/trips_medellin_wb.csv')
 write_csv(trips_export, 'C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/Data/Colombia/Medellin/Cleaned/trips_medellin_wb.csv')
-write_csv(trips_export, 'C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/ITHIM-R/data/local/bogota_wb2/trips_medellin_wb.csv')
+write_csv(trips_export, 'C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/ITHIM-R/data/local/medellin_wb/trips_medellin_wb.csv')
 
 

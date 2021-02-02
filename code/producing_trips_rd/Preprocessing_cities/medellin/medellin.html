@@ -11,7 +11,7 @@
 
 <meta name="author" content="Daniel" />
 
-<meta name="date" content="2021-01-26" />
+<meta name="date" content="2021-02-01" />
 
 <title>Preprocessing of Medellin’s travel dataset</title>
 
@@ -1707,13 +1707,16 @@ div.tocify {
 
 <h1 class="title toc-ignore">Preprocessing of Medellin’s travel dataset</h1>
 <h4 class="author">Daniel</h4>
-<h4 class="date">2021-01-26</h4>
+<h4 class="date">2021-02-01</h4>
 
 </div>
 
 
 <div id="understanding-phase" class="section level1">
 <h1><strong>Understanding phase</strong></h1>
+<pre><code>##           used (Mb) gc trigger  (Mb) max used (Mb)
+## Ncells  997323 53.3    2038028 108.9  1303555 69.7
+## Vcells 1677464 12.8    8388608  64.0  2293140 17.5</code></pre>
 <div id="documentation" class="section level2">
 <h2>Documentation</h2>
 <p>Documentation is located in “…/Colombia/Medellin/EOD2017”. These files were obtained from <a href="https://datosabiertos.metropol.gov.co/" class="uri">https://datosabiertos.metropol.gov.co/</a> but also sent to me from the project of WWF. I looked for information with more detail and the only thing that is published is this dashboard: <a href="https://www.metropol.gov.co/observatorio/Paginas/encuestaorigendestino.aspx" class="uri">https://www.metropol.gov.co/observatorio/Paginas/encuestaorigendestino.aspx</a></p>
@@ -2921,7 +2924,7 @@ NA
 </ol>
 <pre class="r"><code>write_csv(trips_export, &#39;C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/ITHIM-R/inst/extdata/local/medellin_wb/trips_medellin_wb.csv&#39;)
 write_csv(trips_export, &#39;C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/Data/Colombia/Medellin/Cleaned/trips_medellin_wb.csv&#39;)
-write_csv(trips_export, &#39;C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/ITHIM-R/data/local/bogota_wb2/trips_medellin_wb.csv&#39;)</code></pre>
+write_csv(trips_export, &#39;C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/ITHIM-R/data/local/medellin_wb/trips_medellin_wb.csv&#39;)</code></pre>
 </div>
 </div>
 
