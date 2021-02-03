@@ -42,10 +42,14 @@ st_options(bootstrap.css     = FALSE,       # Already part of the theme so no ne
 trip <- read_csv("../../data/local/bogota/bogota_trip.csv")
 quality_check(trip)
 trip_summary$Bogota <- value
-# 
-# trip <- read_csv("../../data/local/bogota_wb2/trips_bogota_wb2.csv")
-# quality_check(trip)
-# trip_summary$Bogota_wb <- value
+ 
+trip <- read_csv("../../data/local/bogota_wb2/bogota_trips_wb2.csv")
+quality_check(trip)
+trip_summary$Bogota_2019 <- value
+
+trip <- read_csv("../../data/local/bogota_wb2/bogota_trips_longer15_wb2.csv")
+quality_check(trip)
+trip_summary$Bogota_2019_longer15 <- value
 # 
 # trip <- read_csv("../../data/local/cali_wb/trips_cali_wb.csv")
 # quality_check(trip)

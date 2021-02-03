@@ -257,6 +257,10 @@ duration_bogota <- duration %>%
              by = c("id_hogar" = "Id_Hogar")) %>% 
   filter(municipio == "11001")
 
+duration_bogota_longer_15 <- duration_bogota %>% 
+  filter(modo_principal != "A pie" | 
+           (modo_principal == "A pie" & duracion >= 15))
+
 stages_bogota <- stages %>% 
   inner_join(hh[,c("municipio", "Id_Hogar")], 
              by = c("id_hogar" = "Id_Hogar")) %>% 
@@ -267,7 +271,12 @@ trips_bogota <- trips %>%
              by = c("id_hogar" = "Id_Hogar")) %>% 
   filter(municipio == "11001")
 
-#' ## Classification and translation of trip modes
+people_bogota <- people %>% 
+  inner_join(hh[,c("municipio", "Id_Hogar")], 
+             by = c("id_hogar" = "Id_Hogar")) %>% 
+  filter(municipio == "11001")
+
+#' ## Classification and translation of trip modes and purpose
 #' As it was mentioned before, there is already a table with all trip modes
 #' collected in the survey in **File1** (page 111, Tabla 4.4). So I copied it 
 #' and pasted it in an excel file to make the classification and translation. 
@@ -277,9 +286,19 @@ main_mode %>% kbl() %>% kable_classic()
 
 #' The first two columns of this table have been defined in the documentation,
 #' so I created the new classification (in Spanish) and its equivalence to Ithim,
-#' taking into account travel modes defined in standardized_modes file (.../ITHIM-R/data/global/modes/standardized_modes.csv)
+#' taking into account travel modes defined in standardized_modes file (.../ITHIM-R/data/global/modes/standardized_modes.csv).
 #' 
 #' **Note**: Definition and pictures of modes are in **File3**.
+#' 
+#' Now with respect to trip purpose, I only had to translate them. This is the
+#' result:
+purpose <- read_excel("C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/Data/Colombia/Hierarchy.xlsx", sheet = "Bogota_purpose")
+purpose %>% kbl() %>% kable_classic()
+
+#' The first two columns have been taken from the dataset and the questionnaire,
+#' and the third column is the translation and classification of these motives. 
+#' Last two columns correspond to what Lambed defined in 2015.
+#' 
 #'
 #' ## Information at stage or trip level?
 #' There is information at stage level although it seems that is not enough 
@@ -381,42 +400,101 @@ length(unique(trips_bogota$trip_id_paste)) == length(unique(duration_bogota$trip
 
 sum(sort(unique(trips_bogota$trip_id_paste)) == sort(unique(duration_bogota$trip_id_paste)))
 
-#' Now, creating the variables I need:
-duration_bogota <- duration_bogota %>% 
-  left_join(people[, c("id_hogar", "id_persona", "p4_edad", "Sexo")], 
-            by = c("id_hogar", "id_persona")) %>% 
-  mutate(participant_id = paste0(id_hogar, id_persona),
-         trip_id = paste0(id_hogar, id_persona, id_viaje),
+#' ## Create variables for quick report
+#' I need to create some variables to run the report that Lambed developed in 
+#' the function *quality_check*.
+report <- people_bogota %>% 
+  left_join(duration_bogota, by = c("id_hogar", "id_persona")) %>% 
+  left_join(trips_bogota[, c("id_hogar", "id_persona", 
+                              "id_viaje", "p17_Id_motivo_viaje")],
+            by = c("id_hogar", "id_persona", "id_viaje")) %>% 
+  mutate(cluster_id = 1,
+         household_id = id_hogar,
+         participant_id = id_persona,
+         trip_id = id_viaje,
          age = p4_edad,
-         sex = ifelse(Sexo == "Hombre", "male", "female"),
+         sex = ifelse(Sexo == "Hombre", "Male", "Female"),
          trip_duration = duracion,
          trip_mode = main_mode$ITHIM[
-           match(modo_principal, main_mode$TripMode)]
-  )
+           match(modo_principal, main_mode$TripMode)],
+         participant_wt = f_exp.x,
+         trip_purpose = purpose$ITHIM[
+           match(p17_Id_motivo_viaje, purpose$Code)]) %>% 
+  select(cluster_id, household_id, participant_id, sex, age, participant_wt,
+         trip_id, trip_mode, trip_duration, trip_purpose)
+
+report$meta_data <- NA
+report$meta_data[1] <- 9135800
+report$meta_data[2] <- 17497 
+report$meta_data[3] <- "Travel Survey"
+report$meta_data[4] <- 2019
+report$meta_data[5] <- "1 day"
+report$meta_data[6] <- "Yes, but no stage duration" #Stage level data available
+report$meta_data[7] <- "All purpose"#Overall trip purpose
+report$meta_data[8] <- "Yes, but not here (yet)" # Short walks to PT
+report$meta_data[9] <- "No" # Distance available
+report$meta_data[10] <- "Truck, van" # missing modes#' 
 
 #' I verify that every trip has the sex and age of the person who did it. Since
 #' the sum of NAs is zero, then I can conclude that every trip has the
 #' information.
-sum(is.na(duration_bogota$sex))
-sum(is.na(duration_bogota$age))
-sum(is.na(duration_bogota$trip_duration))
-sum(is.na(duration_bogota$trip_mode))
+sum(is.na(report$sex))
+sum(is.na(report$age))
+sum(is.na(report$trip_duration))
+sum(is.na(report$trip_mode))
 
-#' ## Create variables for quick report
-#' **ToDo: see what variables are needed for quality check function**
-#' 
+#' Export dataset to make the report
+write_csv(report, 'C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/ITHIM-R/data/local/bogota_wb2/bogota_trips_wb2.csv')
+
+#' Doing the same but filtering out walking trips shorter than 15 minutes
+report_longer_15 <- people_bogota %>% 
+  left_join(duration_bogota_longer_15, by = c("id_hogar", "id_persona")) %>% 
+  left_join(trips_bogota[, c("id_hogar", "id_persona", 
+                             "id_viaje", "p17_Id_motivo_viaje")],
+            by = c("id_hogar", "id_persona", "id_viaje")) %>% 
+  mutate(cluster_id = 1,
+         household_id = id_hogar,
+         participant_id = id_persona,
+         trip_id = id_viaje,
+         age = p4_edad,
+         sex = ifelse(Sexo == "Hombre", "Male", "Female"),
+         trip_duration = duracion,
+         trip_mode = main_mode$ITHIM[
+           match(modo_principal, main_mode$TripMode)],
+         participant_wt = f_exp.x,
+         trip_purpose = purpose$ITHIM[
+           match(p17_Id_motivo_viaje, purpose$Code)]) %>% 
+  select(cluster_id, household_id, participant_id, sex, age, participant_wt,
+         trip_id, trip_mode, trip_duration, trip_purpose)
+
+report_longer_15$meta_data <- NA
+report_longer_15$meta_data[1] <- 9135800
+report_longer_15$meta_data[2] <- 17497 
+report_longer_15$meta_data[3] <- "Travel Survey"
+report_longer_15$meta_data[4] <- 2019
+report_longer_15$meta_data[5] <- "1 day"
+report_longer_15$meta_data[6] <- "Yes, but no stage duration" #Stage level data available
+report_longer_15$meta_data[7] <- "All purpose"#Overall trip purpose
+report_longer_15$meta_data[8] <- "Yes, but not here (yet)" # Short walks to PT
+report_longer_15$meta_data[9] <- "No" # Distance available
+report_longer_15$meta_data[10] <- "Truck, van" # missing modes#' 
+
+#' Export dataset to make the report
+write_csv(report_longer_15, 'C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/ITHIM-R/data/local/bogota_wb2/bogota_trips_longer15_wb2.csv')
+
 #' ## Standardize trip modes
 #' There's already a function that standardize these modes so the package can use
 #' these trips. I made sure to use translate trip modes so that the function
 #' works perfectly (take a look at the *original* variable of *smodes* dataframe
 #' in this function).
 
-trips_export <- standardize_modes(duration_bogota, mode = c('trip'))
-unique(duration_bogota$trip_mode)
+#trips_export <- standardize_modes(duration_bogota, mode = c('trip'))
+trips_export <- standardize_modes(report, mode = c('trip'))
+unique(report$trip_mode)
 unique(trips_export$trip_mode)
 #' 
-#' *standardize_modes* function converts bicycle to cycle, train to rail, and 
-#' rickshaw to auto_rickshaw.
+#' *standardize_modes* function converts walk to pedestrian, van to car, 
+#' bicycle to cycle, train to rail, and rickshaw to auto_rickshaw.
 #'
 #'
 #' # **Exporting phase**
@@ -426,16 +504,15 @@ trips_export <- trips_export %>%
   select(participant_id, age, sex, trip_id, trip_mode, trip_duration)
 
 #' ## Export dataset
-#' I'm exporting this dataset to three different locations:
+#' I'm exporting this dataset to two different locations:
 #' 
 #' 1. In .../inst/exdata folder so the dataset is installed with the package
 #' 2. In Data/Colombia/Bogota/Cleaned, to have a copy 
-#' 3. in data/local/bogota_wb to export the dataset with the variables for the
-#' quick report. 
+#' 
 #' In this case I called it bogota_wb2, because Lady made the preprocessing of
 #' this dataset before, and I don't want to lose it. Lady's datset are bogota_Wb.
 write_csv(trips_export, 'C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/ITHIM-R/inst/extdata/local/bogota_wb2/trips_bogota_wb2.csv')
 write_csv(trips_export, 'C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/Data/Colombia/Bogota/Cleaned/trips_bogota_wb2.csv')
-write_csv(trips_export, 'C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/ITHIM-R/data/local/bogota_wb2/trips_bogota_wb2.csv')
+
 
 
