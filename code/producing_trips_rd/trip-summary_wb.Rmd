@@ -42,7 +42,7 @@ st_options(bootstrap.css     = FALSE,       # Already part of the theme so no ne
 trip <- read_csv("../../data/local/bogota/bogota_trip.csv")
 quality_check(trip)
 trip_summary$Bogota <- value
- 
+
 trip <- read_csv("../../data/local/bogota_wb2/bogota_trips_wb2.csv")
 quality_check(trip)
 trip_summary$Bogota_2019 <- value
@@ -67,13 +67,17 @@ trip_summary$Bogota_2019_longer15 <- value
 # quality_check(trip)
 # trip_summary$Medellin_wb <- value
 # 
-# trip <- read_csv("../../data/local/mexico_city/mexico_city_trip.csv")
-# quality_check(trip)
-# trip_summary$Mexico <- value
-# 
-# trip <- read_csv("../../data/local/mexico_city_wb/trips_mexico_city_wb.csv")
-# quality_check(trip)
-# trip_summary$Mexico_city_wb <- value
+trip <- read_csv("../../data/local/mexico_city/mexico_city_trip.csv")
+quality_check(trip)
+trip_summary$Mexico <- value
+ 
+trip <- read_csv("../../data/local/mexico_city_wb/mexico_city_trips_wb.csv")
+quality_check(trip)
+trip_summary$Mexico_city_weekdays <- value
+
+trip <- read_csv("../../data/local/mexico_city_wb/mexico_city_trips_wb2.csv")
+quality_check(trip)
+trip_summary$Mexico_city_weekend <- value
 # 
 # trip <- read_csv("../../data/local/santiago/santiago_trip.csv")
 # quality_check(trip)
