@@ -400,30 +400,43 @@ length(unique(trips_bogota$trip_id_paste)) == length(unique(duration_bogota$trip
 
 sum(sort(unique(trips_bogota$trip_id_paste)) == sort(unique(duration_bogota$trip_id_paste)))
 
+#' The next step consists in join both datasets and create trips variables.
+trips_bogota_v2 <- trips_bogota %>% 
+  left_join(duration_bogota, by = c("id_hogar", "id_persona", "id_viaje")) %>% 
+  mutate(trip_id = id_viaje,
+         trip_duration = duracion,
+         trip_mode = main_mode$ITHIM[
+           match(modo_principal.y, main_mode$TripMode)],
+         trip_purpose = purpose$ITHIM[
+           match(p17_Id_motivo_viaje, purpose$Code)])
+
+#' And doing the same but filtering out walking trips shorter than 15 minutes
+trips_bogota_longer_15 <- trips_bogota %>% 
+  inner_join(duration_bogota_longer_15, 
+            by = c("id_hogar", "id_persona", "id_viaje")) %>% 
+  mutate(trip_id = id_viaje,
+         trip_duration = duracion,
+         trip_mode = main_mode$ITHIM[
+           match(modo_principal.y, main_mode$TripMode)],
+         trip_purpose = purpose$ITHIM[
+           match(p17_Id_motivo_viaje, purpose$Code)])
+
 #' ## Create variables for quick report
 #' I need to create some variables to run the report that Lambed developed in 
 #' the function *quality_check*.
 report <- people_bogota %>% 
-  left_join(duration_bogota, by = c("id_hogar", "id_persona")) %>% 
-  left_join(trips_bogota[, c("id_hogar", "id_persona", 
-                              "id_viaje", "p17_Id_motivo_viaje")],
-            by = c("id_hogar", "id_persona", "id_viaje")) %>% 
+left_join(trips_bogota_v2, by = c("id_hogar", "id_persona")) %>% 
   mutate(cluster_id = 1,
          household_id = id_hogar,
          participant_id = id_persona,
-         trip_id = id_viaje,
          age = p4_edad,
          sex = ifelse(Sexo == "Hombre", "Male", "Female"),
-         trip_duration = duracion,
-         trip_mode = main_mode$ITHIM[
-           match(modo_principal, main_mode$TripMode)],
-         participant_wt = f_exp.x,
-         trip_purpose = purpose$ITHIM[
-           match(p17_Id_motivo_viaje, purpose$Code)]) %>% 
+         participant_wt = f_exp,
+         meta_data = NA) %>% 
   select(cluster_id, household_id, participant_id, sex, age, participant_wt,
-         trip_id, trip_mode, trip_duration, trip_purpose)
+         trip_id, trip_mode, trip_duration, trip_purpose) #%>% 
+  #arrange(cluster_id, household_id, participant_id, trip_id)
 
-report$meta_data <- NA
 report$meta_data[1] <- 9135800
 report$meta_data[2] <- 17497 
 report$meta_data[3] <- "Travel Survey"
@@ -448,26 +461,18 @@ write_csv(report, 'C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBa
 
 #' Doing the same but filtering out walking trips shorter than 15 minutes
 report_longer_15 <- people_bogota %>% 
-  left_join(duration_bogota_longer_15, by = c("id_hogar", "id_persona")) %>% 
-  left_join(trips_bogota[, c("id_hogar", "id_persona", 
-                             "id_viaje", "p17_Id_motivo_viaje")],
-            by = c("id_hogar", "id_persona", "id_viaje")) %>% 
+  left_join(trips_bogota_longer_15, by = c("id_hogar", "id_persona")) %>% 
   mutate(cluster_id = 1,
          household_id = id_hogar,
          participant_id = id_persona,
-         trip_id = id_viaje,
          age = p4_edad,
          sex = ifelse(Sexo == "Hombre", "Male", "Female"),
-         trip_duration = duracion,
-         trip_mode = main_mode$ITHIM[
-           match(modo_principal, main_mode$TripMode)],
-         participant_wt = f_exp.x,
-         trip_purpose = purpose$ITHIM[
-           match(p17_Id_motivo_viaje, purpose$Code)]) %>% 
+         participant_wt = f_exp,
+         meta_data = NA) %>% 
   select(cluster_id, household_id, participant_id, sex, age, participant_wt,
-         trip_id, trip_mode, trip_duration, trip_purpose)
+         trip_id, trip_mode, trip_duration, trip_purpose) #%>% 
+  #arrange(cluster_id, household_id, participant_id, trip_id)
 
-report_longer_15$meta_data <- NA
 report_longer_15$meta_data[1] <- 9135800
 report_longer_15$meta_data[2] <- 17497 
 report_longer_15$meta_data[3] <- "Travel Survey"
@@ -492,11 +497,17 @@ write_csv(report_longer_15, 'C:/Users/danie/Documents/Daniel_Gil/Consultorias/20
 trips_export <- standardize_modes(report, mode = c('trip'))
 unique(report$trip_mode)
 unique(trips_export$trip_mode)
-#' 
-#' *standardize_modes* function converts walk to pedestrian, van to car, 
+
+#' *standardize_modes* function transforms walk to pedestrian, van to car, 
 #' bicycle to cycle, train to rail, and rickshaw to auto_rickshaw.
 #'
-#'
+#' ## Creating again IDs
+trips_export <- trips_export %>% mutate(
+  participant_id = as.integer(as.factor(paste(cluster_id, household_id,
+                                               participant_id, sep = "_"))),
+  trip_id = as.integer(as.factor(paste(cluster_id, household_id,
+                                        participant_id, trip_id, sep = "_"))))
+
 #' # **Exporting phase**
 #' ## Variables to export
 #' Now I filter the columns I need

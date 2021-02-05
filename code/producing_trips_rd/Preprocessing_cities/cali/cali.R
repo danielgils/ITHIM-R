@@ -11,7 +11,6 @@
 #+ warning=FALSE, message=FALSE, echo=FALSE
 # Loading libraries
 library(foreign) 
-#library(RODBC)
 library(kableExtra)
 library(readxl)
 library(tidyverse)
@@ -224,15 +223,20 @@ t_people
 #   arrange(desc(P_E1_14_D))
 
 #' # **Preprocessing phase**
-#' ## Filtering Cali trips only
+#' ## Filtering people from Cali only
 #' Since the survey was conducted in 5 municipalities and we are only interested
-#' in Cali, then these trips are the only ones used. I could've used the
+#' in Cali, then these people are the only ones used. I could've used the
 #' information of other municipalities, if there had been data about injuries in 
 #' these locations, but unfortunately we only have injuries in Cali.
-trips_cali <- trips %>% 
+people_cali <- people %>% 
   inner_join(hh[,c("ORDEN", "MUNICIPIO")], 
              by = "ORDEN") %>% 
   filter(MUNICIPIO == "CALI")
+
+#' I verify that there are no duplicates in people dataset
+people_cali <- people_cali %>% 
+  mutate(participant_id_paste = paste(ORDEN, ID_PER, sep = "-"))
+length(unique(people_cali$participant_id_paste)) == nrow(people_cali)
 
 #' ## Classification and translation of trip modes
 #' Nowhere in the documentation says something about the process to define the
@@ -253,6 +257,14 @@ main_mode %>% kbl() %>% kable_classic()
 #' *Note: In the dataset these modes are coded, so I had to open the Access*
 #' *database to get the meaning of each code.*
 
+#' Now with respect to trip purpose, I only had to translate them. This is the
+#' result:
+purpose <- read_excel("C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/Data/Colombia/Hierarchy.xlsx", sheet = "Cali_purpose")
+purpose %>% kbl() %>% kable_classic()
+
+#' The first two columns have been taken from the dataset and access database,
+#' and the third column is the translation and classification of these motives. 
+#' 
 #' ## Information at stage or trip level?
 #' There is information at stage level although it seems that is not enough 
 #' because of the duration of each stage. 
@@ -260,7 +272,7 @@ main_mode %>% kbl() %>% kable_classic()
 #' person at random and followed the questionnaire (see **File4**) while checking
 #' the information in the datasets. The person selected has ORDEN = "04414"
 #' and ID_PER = "01" and NO_VIAJE = "01"
-trips_cali %>% filter(ORDEN == "04414" & ID_PER == "01" & 
+trips %>% filter(ORDEN == "04414" & ID_PER == "01" & 
                         NO_VIAJE == "01") %>% 
   select(ORDEN, ID_PER, P_09_HR_D, P_09_MN_D, P_MP_14_D, P_E1_14_D, P_E2_14_D, P_E3_14_D, P_E4_14_D, P_E5_14_D, P_E6_14_D, P_E7_14_D, P_27_HR_D,
          P_27_MN_D, T_VIAJE) %>% kbl() %>% kable_classic()
@@ -288,23 +300,21 @@ trips_cali %>% filter(ORDEN == "04414" & ID_PER == "01" &
 #' **remaining modes. In this way, we used all information provided for trips**
 #' **with only one stage and have a rough estimate of duration for trips with**
 #' **more than one stage.**
-
+#' 
 #' ## Row for each trip, translate trip_mode and create duration, sex and age
 #' Trip dataset already has a row for each trip, so I have to create the 
 #' variables I need. 
-unique(people$P_04_B)
-trips_cali_v2 <- trips_cali %>% 
-# I use inner join instead of left_join to remove trips that doesn't have
-# personal information (mentioned above)
-inner_join(people[,c("ORDEN", "ID_PER", "P_05_B", "P_04_B")],
-           by = c("ORDEN", "ID_PER")) %>% 
-  mutate(participant_id = paste0(ORDEN, ID_PER),
-         trip_id = paste0(ORDEN, ID_PER, NO_VIAJE),
-         age = P_05_B,
-         sex = ifelse(P_05_B == "HOMBRE", "male", "female"),
+trips_v2 <- trips %>% 
+  mutate(trip_id = NO_VIAJE,
          trip_duration = T_VIAJE,
          trip_mode = main_mode$ITHIM[
-           match(P_E1_14_D, main_mode$Code)])
+           match(P_E1_14_D, main_mode$Code)],
+         trip_purpose = purpose$ITHIM[
+           match(P_13_D, purpose$Code)],
+         trip_id_paste = paste(ORDEN, ID_PER, NO_VIAJE, sep = "-"))
+
+#' I verify that there are no duplicates in trip dataset
+length(unique(trips_v2$trip_id_paste)) == nrow(trips_v2)
 
 #' It is important to mention that in this dataset I decided to use the main 
 #' mode that appears in *P_E1_14_D* and not in *P_MP_14_D*, because the later 
@@ -315,35 +325,74 @@ inner_join(people[,c("ORDEN", "ID_PER", "P_05_B", "P_04_B")],
 #' **ToDo: Try to implement time duration following the protocol from Bogota's**
 #' **documentation, because it takes into account differences between days.**
 #' **This file is "Caracterización de la movilidad – Encuesta de Movilidad de Bogotá 2019", page 202, paragraph 6.44**
+#' 
+#' 
+#' ## Create variables for quick report
+#' I need to create some variables to run the report that Lambed developed in 
+#' the function *quality_check*.
+report <- people_cali %>% 
+  left_join(trips_v2, by = c("ORDEN", "ID_PER")) %>% 
+  mutate(cluster_id = 1,
+         household_id = ORDEN,
+         participant_id = ID_PER,
+         age = P_05_B,
+         sex = ifelse(P_04_B == "HOMBRE", "Male", "Female"),
+         participant_wt = F_EXP.x,
+         meta_data = NA) %>% 
+  select(cluster_id, household_id, participant_id, sex, age, participant_wt,
+         trip_id, trip_mode, trip_duration, trip_purpose) 
+
+report$meta_data[1] <- 2178842
+report$meta_data[2] <- "..." 
+report$meta_data[3] <- "Travel Survey"
+report$meta_data[4] <- 2015
+report$meta_data[5] <- "1 day"
+report$meta_data[6] <- "Yes, but no stage duration" #Stage level data available
+report$meta_data[7] <- "All purpose"#Overall trip purpose
+report$meta_data[8] <- "Yes, but not here (yet)" # Short walks to PT
+report$meta_data[9] <- "No" # Distance available
+report$meta_data[10] <- "..." # missing modes#' 
+
 
 #' I verify that every trip has the sex and age of the person who did it. Since
 #' the sum of NAs is zero, then I can conclude that every trip has the
 #' information.
-sum(is.na(trips_cali_v2$sex))
-sum(is.na(trips_cali_v2$age))
-sum(is.na(trips_cali_v2$trip_duration))
-sum(is.na(trips_cali_v2$trip_mode))
+sum(is.na(report$sex))
+sum(is.na(report$age))
+sum(is.na(report$trip_duration))
+sum(is.na(report$trip_mode))
 
+#' There are some trips without duration. This is related to what I said before
+#' about trying to clean this dataset better.
+#' 
 #' Since there are some trips without duration, I removed them for now. But I 
 #' think it's better to compute duration using Bogota's protocol.
-trips_cali_v2 <- trips_cali_v2 %>% drop_na(trip_duration)
+#' **I leave this part in stand by, while I figure something out**
+#trips_cali_v2 <- trips_cali_v2 %>% drop_na(trip_duration)
 
-#' ## Create variables for quick report
-#' **ToDo: see what variables are needed for quality check function**
-#' 
+#' Export dataset to make the report
+write_csv(report, 'C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/ITHIM-R/data/local/cali_wb/cali_trips_wb.csv')
+
 #' ## Standardize trip modes
 #' There's already a function that standardize these modes so the package can use
 #' these trips. I made sure to use translate trip modes so that the function
 #' works perfectly (take a look at the *original* variable of *smodes* dataframe
 #' in this function).
 
-trips_export <- standardize_modes(trips_cali_v2, mode = c('trip'))
-unique(trips_cali_v2$trip_mode)
+trips_export <- standardize_modes(report, mode = c('trip'))
+unique(report$trip_mode)
 unique(trips_export$trip_mode)
 
 #' *standardize_modes* function converts bicycle to cycle, van to car, and 
 #' rickshaw to auto_rickshaw.
-#'
+#' 
+#' ## Creating again IDs
+trips_export <- trips_export %>% mutate(
+  participant_id = as.integer(as.factor(paste(cluster_id, household_id,
+                                              participant_id, sep = "_"))),
+  trip_id = as.integer(as.factor(paste(cluster_id, household_id,
+                                       participant_id, trip_id, sep = "_"))))
+
 #' # **Exporting phase**
 #' ## Variables to export
 #' Now I filter the columns I need
@@ -351,14 +400,13 @@ trips_export <- trips_export %>%
   select(participant_id, age, sex, trip_id, trip_mode, trip_duration)
 
 #' ## Export dataset
-#' I'm exporting this dataset to three different locations:
+#' I'm exporting this dataset to two different locations:
 #' 
 #' 1. In .../inst/exdata folder so the dataset is installed with the package
 #' 2. In Data/Colombia/Medellin/Cleaned, to have a copy 
-#' 3. in data/local/medellin_wb to export the dataset with the variables for the
 #' quick report. 
 write_csv(trips_export, 'C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/ITHIM-R/inst/extdata/local/cali_wb/trips_cali_wb.csv')
 write_csv(trips_export, 'C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/Data/Colombia/Cali/Cleaned/trips_cali_wb.csv')
-write_csv(trips_export, 'C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/ITHIM-R/data/local/cali_wb/trips_cali_wb.csv')
+
 
 

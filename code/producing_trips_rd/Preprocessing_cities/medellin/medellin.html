@@ -11,7 +11,7 @@
 
 <meta name="author" content="Daniel" />
 
-<meta name="date" content="2021-02-01" />
+<meta name="date" content="2021-02-04" />
 
 <title>Preprocessing of Medellin’s travel dataset</title>
 
@@ -1707,7 +1707,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">Preprocessing of Medellin’s travel dataset</h1>
 <h4 class="author">Daniel</h4>
-<h4 class="date">2021-02-01</h4>
+<h4 class="date">2021-02-04</h4>
 
 </div>
 
@@ -1715,8 +1715,8 @@ div.tocify {
 <div id="understanding-phase" class="section level1">
 <h1><strong>Understanding phase</strong></h1>
 <pre><code>##           used (Mb) gc trigger  (Mb) max used (Mb)
-## Ncells  997323 53.3    2038028 108.9  1303555 69.7
-## Vcells 1677464 12.8    8388608  64.0  2293140 17.5</code></pre>
+## Ncells  999478 53.4    2051151 109.6  1289624 68.9
+## Vcells 1680465 12.9    8388608  64.0  2154499 16.5</code></pre>
 <div id="documentation" class="section level2">
 <h2>Documentation</h2>
 <p>Documentation is located in “…/Colombia/Medellin/EOD2017”. These files were obtained from <a href="https://datosabiertos.metropol.gov.co/" class="uri">https://datosabiertos.metropol.gov.co/</a> but also sent to me from the project of WWF. I looked for information with more detail and the only thing that is published is this dashboard: <a href="https://www.metropol.gov.co/observatorio/Paginas/encuestaorigendestino.aspx" class="uri">https://www.metropol.gov.co/observatorio/Paginas/encuestaorigendestino.aspx</a></p>
@@ -2069,26 +2069,18 @@ length(unique(trips$participant_id_paste)) == nrow(people)</code></pre>
 </div>
 <div id="preprocessing-phase" class="section level1">
 <h1><strong>Preprocessing phase</strong></h1>
-<div id="filtering-medellin-trips-only" class="section level2">
-<h2>Filtering Medellin trips only</h2>
+<div id="filtering-people-from-medellin-only" class="section level2">
+<h2>Filtering people from Medellin only</h2>
 <p>Since the survey was conducted in 10 municipalities and we are only interested in Medellin, then these trips are the only ones used. I could’ve used the information of other municipalities, if there had been data about injuries in these locations, but unfortunately we only have injuries in Medellin.</p>
-<pre class="r"><code>table(hh$NOM_MUNICIPIO, hh$ID_MUNICIPIO)</code></pre>
-<pre><code>##              
-##                001  079  088  129  212  266  308  360  380  631
-##   Barbosa        0  726    0    0    0    0    0    0    0    0
-##   Bello          0    0 2908    0    0    0    0    0    0    0
-##   Caldas         0    0    0  311    0    0    0    0    0    0
-##   Copacabana     0    0    0    0  347    0    0    0    0    0
-##   Envigado       0    0    0    0    0 1810    0    0    0    0
-##   Girardota      0    0    0    0    0    0  278    0    0    0
-##   Itagui         0    0    0    0    0    0    0 1460    0    0
-##   La Estrella    0    0    0    0    0    0    0    0  213    0
-##   Medellin    8038    0    0    0    0    0    0    0    0    0
-##   Sabaneta       0    0    0    0    0    0    0    0    0  249</code></pre>
-<pre class="r"><code>trips_medellin &lt;- trips %&gt;% 
-  inner_join(hh[,c(&quot;ID_HOGAR&quot;, &quot;ID_MUNICIPIO&quot;)], 
+<pre class="r"><code>people_medellin &lt;- people %&gt;% 
+  inner_join(hh[,c(&quot;ID_HOGAR&quot;, &quot;NOM_MUNICIPIO&quot;)], 
              by = &quot;ID_HOGAR&quot;) %&gt;% 
-  filter(ID_MUNICIPIO == &quot;001&quot;)</code></pre>
+  filter(NOM_MUNICIPIO == &quot;Medellin&quot;)</code></pre>
+<p>I verify that there are no duplicates in people dataset</p>
+<pre class="r"><code>people_medellin &lt;- people_medellin %&gt;% 
+  mutate(participant_id_paste = paste(ID_HOGAR, ORDEN_MORADOR, sep = &quot;-&quot;))
+length(unique(people_medellin$participant_id_paste)) == nrow(people_medellin)</code></pre>
+<pre><code>## [1] TRUE</code></pre>
 </div>
 <div id="classification-and-translation-of-trip-modes" class="section level2">
 <h2>Classification and translation of trip modes</h2>
@@ -2415,7 +2407,7 @@ A pie
 A pie
 </td>
 <td style="text-align:left;">
-pedestrian
+walk
 </td>
 <td style="text-align:right;">
 22
@@ -2429,7 +2421,7 @@ A pie 1 cuadra
 A pie
 </td>
 <td style="text-align:left;">
-pedestrian
+walk
 </td>
 <td style="text-align:right;">
 23
@@ -2443,7 +2435,7 @@ A pie 10 cuadras
 A pie
 </td>
 <td style="text-align:left;">
-pedestrian
+walk
 </td>
 <td style="text-align:right;">
 24
@@ -2457,7 +2449,7 @@ A pie 11 cuadras
 A pie
 </td>
 <td style="text-align:left;">
-pedestrian
+walk
 </td>
 <td style="text-align:right;">
 25
@@ -2471,7 +2463,7 @@ A pie 12 cuadras
 A pie
 </td>
 <td style="text-align:left;">
-pedestrian
+walk
 </td>
 <td style="text-align:right;">
 26
@@ -2485,7 +2477,7 @@ A pie 13 cuadras
 A pie
 </td>
 <td style="text-align:left;">
-pedestrian
+walk
 </td>
 <td style="text-align:right;">
 27
@@ -2499,7 +2491,7 @@ A pie 14 cuadras
 A pie
 </td>
 <td style="text-align:left;">
-pedestrian
+walk
 </td>
 <td style="text-align:right;">
 28
@@ -2513,7 +2505,7 @@ A pie 15 cuadras
 A pie
 </td>
 <td style="text-align:left;">
-pedestrian
+walk
 </td>
 <td style="text-align:right;">
 29
@@ -2527,7 +2519,7 @@ A pie 16 cuadras
 A pie
 </td>
 <td style="text-align:left;">
-pedestrian
+walk
 </td>
 <td style="text-align:right;">
 30
@@ -2541,7 +2533,7 @@ A pie 17 cuadras
 A pie
 </td>
 <td style="text-align:left;">
-pedestrian
+walk
 </td>
 <td style="text-align:right;">
 31
@@ -2555,7 +2547,7 @@ A pie 18 cuadras
 A pie
 </td>
 <td style="text-align:left;">
-pedestrian
+walk
 </td>
 <td style="text-align:right;">
 32
@@ -2569,7 +2561,7 @@ A pie 19 cuadras ó más
 A pie
 </td>
 <td style="text-align:left;">
-pedestrian
+walk
 </td>
 <td style="text-align:right;">
 33
@@ -2583,7 +2575,7 @@ A pie 2 cuadras
 A pie
 </td>
 <td style="text-align:left;">
-pedestrian
+walk
 </td>
 <td style="text-align:right;">
 34
@@ -2597,7 +2589,7 @@ A pie 3 cuadras
 A pie
 </td>
 <td style="text-align:left;">
-pedestrian
+walk
 </td>
 <td style="text-align:right;">
 35
@@ -2611,7 +2603,7 @@ A pie 4 cuadras
 A pie
 </td>
 <td style="text-align:left;">
-pedestrian
+walk
 </td>
 <td style="text-align:right;">
 36
@@ -2625,7 +2617,7 @@ A pie 5 cuadras
 A pie
 </td>
 <td style="text-align:left;">
-pedestrian
+walk
 </td>
 <td style="text-align:right;">
 37
@@ -2639,7 +2631,7 @@ A pie 6 cuadras
 A pie
 </td>
 <td style="text-align:left;">
-pedestrian
+walk
 </td>
 <td style="text-align:right;">
 38
@@ -2653,7 +2645,7 @@ A pie 7 cuadras
 A pie
 </td>
 <td style="text-align:left;">
-pedestrian
+walk
 </td>
 <td style="text-align:right;">
 39
@@ -2667,7 +2659,7 @@ A pie 8 cuadras
 A pie
 </td>
 <td style="text-align:left;">
-pedestrian
+walk
 </td>
 <td style="text-align:right;">
 40
@@ -2681,7 +2673,7 @@ A pie 9 cuadras
 A pie
 </td>
 <td style="text-align:left;">
-pedestrian
+walk
 </td>
 <td style="text-align:right;">
 41
@@ -2718,11 +2710,187 @@ other
 </tbody>
 </table>
 <p>The first column of this table have all modes found in trip dataset. The second column has a classification where some of the modes are grouped into bigger categories (I created it in Spanish). Third column has its equivalence so it can be used in the package taking into account travel modes defined in standardized_modes file (…/ITHIM-R/data/global/modes/standardized_modes.csv) . Last column has the hierarchy I created to define the trip main mode. The smaller the number, the more important the mode is.</p>
+<p>Now with respect to trip purpose, I only had to translate them. This is the result:</p>
+<pre class="r"><code>#table(trips$DESC_MOTIVO_VIAJE, trips$MOTIVO_VIAJE)
+purpose &lt;- read_excel(&quot;C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/Data/Colombia/Hierarchy.xlsx&quot;, sheet = &quot;Cali_purpose&quot;)
+purpose %&gt;% kbl() %&gt;% kable_classic()</code></pre>
+<table class=" lightable-classic" style="font-family: &quot;Arial Narrow&quot;, &quot;Source Sans Pro&quot;, sans-serif; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Code
+</th>
+<th style="text-align:left;">
+Purpose
+</th>
+<th style="text-align:left;">
+ITHIM
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+01
+</td>
+<td style="text-align:left;">
+Trabajar
+</td>
+<td style="text-align:left;">
+work
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+02
+</td>
+<td style="text-align:left;">
+Asuntos de trabajo
+</td>
+<td style="text-align:left;">
+work
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+03
+</td>
+<td style="text-align:left;">
+Estudiar
+</td>
+<td style="text-align:left;">
+school
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+04
+</td>
+<td style="text-align:left;">
+Recibir atención en salúd
+</td>
+<td style="text-align:left;">
+other
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+05
+</td>
+<td style="text-align:left;">
+Ver a alguien
+</td>
+<td style="text-align:left;">
+other
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+06
+</td>
+<td style="text-align:left;">
+Volver a casa
+</td>
+<td style="text-align:left;">
+return
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+07
+</td>
+<td style="text-align:left;">
+Buscar / Dejar a alguien
+</td>
+<td style="text-align:left;">
+other
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+08
+</td>
+<td style="text-align:left;">
+Buscar / Dejar algo
+</td>
+<td style="text-align:left;">
+other
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+09
+</td>
+<td style="text-align:left;">
+Comer / Tomar algo
+</td>
+<td style="text-align:left;">
+other
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+10
+</td>
+<td style="text-align:left;">
+Compras
+</td>
+<td style="text-align:left;">
+other
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+11
+</td>
+<td style="text-align:left;">
+Trámites
+</td>
+<td style="text-align:left;">
+other
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+12
+</td>
+<td style="text-align:left;">
+Recreación
+</td>
+<td style="text-align:left;">
+other
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+13
+</td>
+<td style="text-align:left;">
+Buscar trabajo
+</td>
+<td style="text-align:left;">
+work
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+77
+</td>
+<td style="text-align:left;">
+Otra cosa
+</td>
+<td style="text-align:left;">
+other
+</td>
+</tr>
+</tbody>
+</table>
+<p>The first two columns have been taken from the dataset, and the third column is the translation and classification of these motives.</p>
 </div>
 <div id="information-at-stage-or-trip-level" class="section level2">
 <h2>Information at stage or trip level?</h2>
 <p>There is information at stage level although it seems that is not enough because of the duration of each stage. To understand how the information was collected at stage level, I selected a person at random and tried to understand what modes person took to get to its destination. The person selected has ID_HOGAR = 309974, ID_MORADOR = 2 and SEC_VIAJE = 6.</p>
-<pre class="r"><code>trips_medellin %&gt;% filter(ID_HOGAR == &quot;309974&quot;, ID_MORADOR == &quot;2&quot;, 
+<pre class="r"><code>trips %&gt;% filter(ID_HOGAR == &quot;309974&quot;, ID_MORADOR == &quot;2&quot;, 
                         SEC_VIAJE == &quot;6&quot;) %&gt;% 
   select(ID_HOGAR, ID_MORADOR, SEC_VIAJE, HORA_O, HORA_D, DESC_MODO_TTE_E1,
          DESC_MODO_TTE_E2, DESC_MODO_TTE_E3, DESC_MODO_TTE_E4, DEC_MODO_TTE_E5,
@@ -2824,22 +2992,15 @@ NA
 <div id="row-for-each-trip-translate-trip_mode-and-create-duration-sex-and-age" class="section level2">
 <h2>Row for each trip, translate trip_mode and create duration, sex and age</h2>
 <p>Trip dataset already has a row for each trip, so I have to create the variables I need.</p>
-<pre class="r"><code>trips_medellin_v2 &lt;- trips_medellin %&gt;% 
-  # I use inner join instead of left_join to remove trips that doesn&#39;t have
-  # personal information (mentioned above)
-  inner_join(people[,c(&quot;ID_HOGAR&quot;, &quot;ORDEN_MORADOR&quot;, &quot;EDAD&quot;, &quot;GENERO&quot;)],
-             by = c(&quot;ID_HOGAR&quot;, &quot;ID_MORADOR&quot; = &quot;ORDEN_MORADOR&quot;)) %&gt;% 
-  mutate(participant_id = paste0(ID_HOGAR, ID_MORADOR),
-         trip_id = paste0(ID_HOGAR, ID_MORADOR, SEC_VIAJE),
-         age = EDAD,
-         sex = ifelse(GENERO == &quot;1&quot;, &quot;male&quot;, &quot;female&quot;),
+<pre class="r"><code>trips_v2 &lt;- trips %&gt;% 
+  mutate(trip_id = SEC_VIAJE,
          # Transform decimal to hours
          trip_start = ISOdatetime(1900,1,1,0,0,0, tz = &quot;GMT&quot;) + 
-                               as.difftime(as.numeric(HORA_O)*24, 
-                                           unit = &quot;hours&quot;),
+           as.difftime(as.numeric(HORA_O)*24, 
+                       unit = &quot;hours&quot;),
          trip_end = ISOdatetime(1900,1,1,0,0,0, tz = &quot;GMT&quot;) + 
-                             as.difftime(as.numeric(HORA_D)*24, 
-                                         unit = &quot;hours&quot;),
+           as.difftime(as.numeric(HORA_D)*24, 
+                       unit = &quot;hours&quot;),
          trip_duration = difftime(trip_end, trip_start, 
                                   units = &quot;mins&quot;),
          # Replace modes by its hierarchy
@@ -2856,9 +3017,10 @@ NA
          mode_e6 = main_mode$Hierarchy[
            match(DESC_MODO_TTE_E6, main_mode$SurveyTripMode)],
          mode_e7 = main_mode$Hierarchy[
-           match(DESC_MODO_TTE_E7, main_mode$SurveyTripMode)]
-        
-  ) %&gt;%
+           match(DESC_MODO_TTE_E7, main_mode$SurveyTripMode)],
+         trip_purpose = purpose$ITHIM[
+           match(MOTIVO_VIAJE, purpose$Code)],
+         trip_id_paste = paste(ID_HOGAR, ID_MORADOR, SEC_VIAJE, sep = &quot;-&quot;)) %&gt;%
   # Now compute the main mode by looking at the hierarchy
   rowwise() %&gt;% mutate(
     main_modes = min(mode_e1, mode_e2, mode_e3, mode_e4, mode_e5, mode_e6,
@@ -2866,25 +3028,105 @@ NA
     trip_mode = main_mode$ITHIM[
       match(main_modes, main_mode$Hierarchy)]
   )</code></pre>
+<p>I verify that there are no duplicates in trip dataset</p>
+<pre class="r"><code>length(unique(trips_v2$trip_id_paste)) == nrow(trips_v2)</code></pre>
+<pre><code>## [1] FALSE</code></pre>
+<p>In the following output I can see that there’s only one duplicate and it has the same information, So I’m removing it.</p>
+<pre class="r"><code>which(duplicated(trips_v2$trip_id_paste))</code></pre>
+<pre><code>## [1] 59151</code></pre>
+<pre class="r"><code>trips_v2[which(duplicated(trips_v2$trip_id_paste)),]</code></pre>
+<pre><code>## # A tibble: 1 x 59
+## # Rowwise: 
+##   ID_HOGAR ID_MORADOR SEC_VIAJE ID_MUNICIPIO_O MUNICIPIO_O ID_COMUNA_O COMUNA_O
+##   &lt;chr&gt;    &lt;chr&gt;      &lt;chr&gt;     &lt;chr&gt;          &lt;chr&gt;       &lt;chr&gt;       &lt;chr&gt;   
+## 1 1330375  1128       2612      -              Pereira     -           -       
+## # ... with 52 more variables: ID_BARRIO_O &lt;chr&gt;, BARRIO_O &lt;chr&gt;, SIT_O &lt;chr&gt;,
+## #   HORA_O &lt;chr&gt;, ID_MUNICIPIO_D &lt;chr&gt;, MUNICIPIO_D &lt;chr&gt;, ID_COMUNA_D &lt;chr&gt;,
+## #   COMUNA_D &lt;chr&gt;, ID_BARRIO_D &lt;chr&gt;, BARRIO_D2 &lt;chr&gt;, SIT_D &lt;chr&gt;,
+## #   HORA_D &lt;chr&gt;, MOTIVO_VIAJE &lt;chr&gt;, DESC_MOTIVO_VIAJE &lt;chr&gt;,
+## #   MODO_TTE_E1 &lt;chr&gt;, DESC_MODO_TTE_E1 &lt;chr&gt;, MODO_TTE_E2 &lt;chr&gt;,
+## #   DESC_MODO_TTE_E2 &lt;chr&gt;, MODO_TTE_E3 &lt;chr&gt;, DESC_MODO_TTE_E3 &lt;chr&gt;,
+## #   MODO_TTE_E4 &lt;chr&gt;, DESC_MODO_TTE_E4 &lt;chr&gt;, MODO_TTE_E5 &lt;chr&gt;,
+## #   DEC_MODO_TTE_E5 &lt;chr&gt;, MODO_TTE_E6 &lt;chr&gt;, DESC_MODO_TTE_E6 &lt;chr&gt;,
+## #   MODO_TTE_E7 &lt;chr&gt;, DESC_MODO_TTE_E7 &lt;chr&gt;, FREC_CANTIDAD &lt;chr&gt;,
+## #   ID_FREC_VIAJE &lt;chr&gt;, DESC_ID_FREC_VIAJE &lt;chr&gt;, COSTO_TTE_PARQ &lt;chr&gt;,
+## #   FORMA_PAGO_PARQUEADERO &lt;chr&gt;, DESC_FORMA_PAGO_PARQUEADERO &lt;chr&gt;,
+## #   TIPO_PARQUEO &lt;chr&gt;, DESC_TIPO_PARQUEO &lt;chr&gt;, participant_id_paste &lt;chr&gt;,
+## #   trip_id &lt;chr&gt;, trip_start &lt;dttm&gt;, trip_end &lt;dttm&gt;, trip_duration &lt;drtn&gt;,
+## #   mode_e1 &lt;dbl&gt;, mode_e2 &lt;dbl&gt;, mode_e3 &lt;dbl&gt;, mode_e4 &lt;dbl&gt;, mode_e5 &lt;dbl&gt;,
+## #   mode_e6 &lt;dbl&gt;, mode_e7 &lt;dbl&gt;, trip_purpose &lt;chr&gt;, trip_id_paste &lt;chr&gt;,
+## #   main_modes &lt;dbl&gt;, trip_mode &lt;chr&gt;</code></pre>
+<pre class="r"><code>trips_v2[trips_v2$trip_id_paste == &quot;1330375-1128-2612&quot;,]</code></pre>
+<pre><code>## # A tibble: 2 x 59
+## # Rowwise: 
+##   ID_HOGAR ID_MORADOR SEC_VIAJE ID_MUNICIPIO_O MUNICIPIO_O ID_COMUNA_O COMUNA_O
+##   &lt;chr&gt;    &lt;chr&gt;      &lt;chr&gt;     &lt;chr&gt;          &lt;chr&gt;       &lt;chr&gt;       &lt;chr&gt;   
+## 1 1330375  1128       2612      -              Pereira     -           -       
+## 2 1330375  1128       2612      -              Pereira     -           -       
+## # ... with 52 more variables: ID_BARRIO_O &lt;chr&gt;, BARRIO_O &lt;chr&gt;, SIT_O &lt;chr&gt;,
+## #   HORA_O &lt;chr&gt;, ID_MUNICIPIO_D &lt;chr&gt;, MUNICIPIO_D &lt;chr&gt;, ID_COMUNA_D &lt;chr&gt;,
+## #   COMUNA_D &lt;chr&gt;, ID_BARRIO_D &lt;chr&gt;, BARRIO_D2 &lt;chr&gt;, SIT_D &lt;chr&gt;,
+## #   HORA_D &lt;chr&gt;, MOTIVO_VIAJE &lt;chr&gt;, DESC_MOTIVO_VIAJE &lt;chr&gt;,
+## #   MODO_TTE_E1 &lt;chr&gt;, DESC_MODO_TTE_E1 &lt;chr&gt;, MODO_TTE_E2 &lt;chr&gt;,
+## #   DESC_MODO_TTE_E2 &lt;chr&gt;, MODO_TTE_E3 &lt;chr&gt;, DESC_MODO_TTE_E3 &lt;chr&gt;,
+## #   MODO_TTE_E4 &lt;chr&gt;, DESC_MODO_TTE_E4 &lt;chr&gt;, MODO_TTE_E5 &lt;chr&gt;,
+## #   DEC_MODO_TTE_E5 &lt;chr&gt;, MODO_TTE_E6 &lt;chr&gt;, DESC_MODO_TTE_E6 &lt;chr&gt;,
+## #   MODO_TTE_E7 &lt;chr&gt;, DESC_MODO_TTE_E7 &lt;chr&gt;, FREC_CANTIDAD &lt;chr&gt;,
+## #   ID_FREC_VIAJE &lt;chr&gt;, DESC_ID_FREC_VIAJE &lt;chr&gt;, COSTO_TTE_PARQ &lt;chr&gt;,
+## #   FORMA_PAGO_PARQUEADERO &lt;chr&gt;, DESC_FORMA_PAGO_PARQUEADERO &lt;chr&gt;,
+## #   TIPO_PARQUEO &lt;chr&gt;, DESC_TIPO_PARQUEO &lt;chr&gt;, participant_id_paste &lt;chr&gt;,
+## #   trip_id &lt;chr&gt;, trip_start &lt;dttm&gt;, trip_end &lt;dttm&gt;, trip_duration &lt;drtn&gt;,
+## #   mode_e1 &lt;dbl&gt;, mode_e2 &lt;dbl&gt;, mode_e3 &lt;dbl&gt;, mode_e4 &lt;dbl&gt;, mode_e5 &lt;dbl&gt;,
+## #   mode_e6 &lt;dbl&gt;, mode_e7 &lt;dbl&gt;, trip_purpose &lt;chr&gt;, trip_id_paste &lt;chr&gt;,
+## #   main_modes &lt;dbl&gt;, trip_mode &lt;chr&gt;</code></pre>
+<pre class="r"><code>trips_v2 &lt;- trips_v2[-which(duplicated(trips_v2$trip_id_paste)),]</code></pre>
+<p>I verify that there are no duplicates in trip dataset</p>
+<pre class="r"><code>length(unique(trips_v2$trip_id_paste)) == nrow(trips_v2)</code></pre>
+<pre><code>## [1] TRUE</code></pre>
 <p><strong>ToDo: Try to implement time duration following the protocol from Bogota’s</strong> <strong>documentation, because it takes into account differences between days.</strong> <strong>This file is “Caracterización de la movilidad – Encuesta de Movilidad de Bogotá 2019”, page 202, paragraph 6.44</strong></p>
-<p>I verify that every trip has the sex and age of the person who did it. Since the sum of NAs is zero, then I can conclude that every trip has the information.</p>
-<pre class="r"><code>sum(is.na(trips_medellin_v2$sex))</code></pre>
-<pre><code>## [1] 0</code></pre>
-<pre class="r"><code>sum(is.na(trips_medellin_v2$age))</code></pre>
-<pre><code>## [1] 0</code></pre>
-<pre class="r"><code>sum(is.na(trips_medellin_v2$trip_duration))</code></pre>
-<pre><code>## [1] 0</code></pre>
-<pre class="r"><code>sum(is.na(trips_medellin_v2$trip_mode))</code></pre>
-<pre><code>## [1] 0</code></pre>
 </div>
 <div id="create-variables-for-quick-report" class="section level2">
 <h2>Create variables for quick report</h2>
-<p><strong>ToDo: see what variables are needed for quality check function</strong></p>
+<p>I need to create some variables to run the report that Lambed developed in the function <em>quality_check</em>.</p>
+<pre class="r"><code>report &lt;- people_medellin %&gt;% 
+  left_join(trips_v2, by = c(&quot;ID_HOGAR&quot;, &quot;ORDEN_MORADOR&quot; = &quot;ID_MORADOR&quot;)) %&gt;% 
+  mutate(cluster_id = 1,
+         household_id = ID_HOGAR,
+         participant_id = ORDEN_MORADOR,
+         age = EDAD,
+         sex = ifelse(GENERO == &quot;1&quot;, &quot;Male&quot;, &quot;Female&quot;),
+         participant_wt = 1,
+         meta_data = NA) %&gt;% 
+  select(cluster_id, household_id, participant_id, sex, age, participant_wt,
+         trip_id, trip_mode, trip_duration, trip_purpose) 
+
+report$meta_data[1] &lt;- 2293601</code></pre>
+<pre><code>## Warning: Unknown or uninitialised column: `meta_data`.</code></pre>
+<pre class="r"><code>report$meta_data[2] &lt;- &quot;...&quot; 
+report$meta_data[3] &lt;- &quot;Travel Survey&quot;
+report$meta_data[4] &lt;- 2017
+report$meta_data[5] &lt;- &quot;1 day&quot;
+report$meta_data[6] &lt;- &quot;Yes, but no stage duration&quot; #Stage level data available
+report$meta_data[7] &lt;- &quot;All purpose&quot;#Overall trip purpose
+report$meta_data[8] &lt;- &quot;Yes, but not here (yet)&quot; # Short walks to PT
+report$meta_data[9] &lt;- &quot;No&quot; # Distance available
+report$meta_data[10] &lt;- &quot;...&quot; # missing modes#&#39; </code></pre>
+<p>I verify that every trip has the sex and age of the person who did it. Since the sum of NAs is zero, then I can conclude that every trip has the information.</p>
+<pre class="r"><code>sum(is.na(report$sex))</code></pre>
+<pre><code>## [1] 0</code></pre>
+<pre class="r"><code>sum(is.na(report$age))</code></pre>
+<pre><code>## [1] 0</code></pre>
+<pre class="r"><code>sum(is.na(report$trip_duration))</code></pre>
+<pre><code>## [1] 6494</code></pre>
+<pre class="r"><code>sum(is.na(report$trip_mode))</code></pre>
+<pre><code>## [1] 6494</code></pre>
+<p>Export dataset to make the report</p>
+<pre class="r"><code>write_csv(report, &#39;C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/ITHIM-R/data/local/medellin_wb/medellin_trips_wb.csv&#39;)</code></pre>
 </div>
 <div id="standardize-trip-modes" class="section level2">
 <h2>Standardize trip modes</h2>
 <p>There’s already a function that standardize these modes so the package can use these trips. I made sure to use translate trip modes so that the function works perfectly (take a look at the <em>original</em> variable of <em>smodes</em> dataframe in this function).</p>
-<pre class="r"><code>trips_export &lt;- standardize_modes(trips_medellin_v2, mode = c(&#39;trip&#39;))</code></pre>
+<pre class="r"><code>trips_export &lt;- standardize_modes(report, mode = c(&#39;trip&#39;))</code></pre>
 <pre><code>## Parsed with column specification:
 ## cols(
 ##   number = col_double(),
@@ -2897,13 +3139,22 @@ NA
 ##   inj_str_shrt = col_character(),
 ##   original = col_character()
 ## )</code></pre>
-<pre class="r"><code>unique(trips_medellin_v2$trip_mode)</code></pre>
-<pre><code>## [1] &quot;pedestrian&quot; &quot;bus&quot;        &quot;car&quot;        &quot;taxi&quot;       &quot;metro&quot;     
-## [6] &quot;motorcycle&quot; &quot;bicycle&quot;    &quot;van&quot;        &quot;rickshaw&quot;</code></pre>
+<pre class="r"><code>unique(report$trip_mode)</code></pre>
+<pre><code>##  [1] NA           &quot;walk&quot;       &quot;taxi&quot;       &quot;car&quot;        &quot;bus&quot;       
+##  [6] &quot;metro&quot;      &quot;bicycle&quot;    &quot;motorcycle&quot; &quot;van&quot;        &quot;rickshaw&quot;</code></pre>
 <pre class="r"><code>unique(trips_export$trip_mode)</code></pre>
-<pre><code>## [1] &quot;pedestrian&quot;    &quot;bus&quot;           &quot;car&quot;           &quot;taxi&quot;         
-## [5] &quot;rail&quot;          &quot;motorcycle&quot;    &quot;cycle&quot;         &quot;auto_rickshaw&quot;</code></pre>
+<pre><code>## [1] NA              &quot;pedestrian&quot;    &quot;taxi&quot;          &quot;car&quot;          
+## [5] &quot;bus&quot;           &quot;rail&quot;          &quot;cycle&quot;         &quot;motorcycle&quot;   
+## [9] &quot;auto_rickshaw&quot;</code></pre>
 <p><em>standardize_modes</em> function converts bicycle to cycle, metro to rail, and rickshaw to auto_rickshaw.</p>
+</div>
+<div id="creating-again-ids" class="section level2">
+<h2>Creating again IDs</h2>
+<pre class="r"><code>trips_export &lt;- trips_export %&gt;% mutate(
+  participant_id = as.integer(as.factor(paste(cluster_id, household_id,
+                                              participant_id, sep = &quot;_&quot;))),
+  trip_id = as.integer(as.factor(paste(cluster_id, household_id,
+                                       participant_id, trip_id, sep = &quot;_&quot;))))</code></pre>
 </div>
 </div>
 <div id="exporting-phase" class="section level1">
@@ -2916,15 +3167,13 @@ NA
 </div>
 <div id="export-dataset" class="section level2">
 <h2>Export dataset</h2>
-<p>I’m exporting this dataset to three different locations:</p>
+<p>I’m exporting this dataset to two different locations:</p>
 <ol style="list-style-type: decimal">
 <li>In …/inst/exdata folder so the dataset is installed with the package</li>
 <li>In Data/Colombia/Medellin/Cleaned, to have a copy</li>
-<li>in data/local/medellin_wb to export the dataset with the variables for the quick report.</li>
 </ol>
 <pre class="r"><code>write_csv(trips_export, &#39;C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/ITHIM-R/inst/extdata/local/medellin_wb/trips_medellin_wb.csv&#39;)
-write_csv(trips_export, &#39;C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/Data/Colombia/Medellin/Cleaned/trips_medellin_wb.csv&#39;)
-write_csv(trips_export, &#39;C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/ITHIM-R/data/local/medellin_wb/trips_medellin_wb.csv&#39;)</code></pre>
+write_csv(trips_export, &#39;C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/Data/Colombia/Medellin/Cleaned/trips_medellin_wb.csv&#39;)</code></pre>
 </div>
 </div>
 

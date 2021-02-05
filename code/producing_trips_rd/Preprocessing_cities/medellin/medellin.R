@@ -167,16 +167,20 @@ people[people$ID_HOGAR == "401022" & people$ORDEN_MORADOR == "158",]
 trips[trips$participant_id_paste == "401022-158",]
 
 #' # **Preprocessing phase**
-#' ## Filtering Medellin trips only
+#' ## Filtering people from Medellin only
 #' Since the survey was conducted in 10 municipalities and we are only interested
 #' in Medellin, then these trips are the only ones used. I could've used the
 #' information of other municipalities, if there had been data about injuries in 
 #' these locations, but unfortunately we only have injuries in Medellin.
-table(hh$NOM_MUNICIPIO, hh$ID_MUNICIPIO)
-trips_medellin <- trips %>% 
-  inner_join(hh[,c("ID_HOGAR", "ID_MUNICIPIO")], 
+people_medellin <- people %>% 
+  inner_join(hh[,c("ID_HOGAR", "NOM_MUNICIPIO")], 
              by = "ID_HOGAR") %>% 
-  filter(ID_MUNICIPIO == "001")
+  filter(NOM_MUNICIPIO == "Medellin")
+
+#' I verify that there are no duplicates in people dataset
+people_medellin <- people_medellin %>% 
+  mutate(participant_id_paste = paste(ID_HOGAR, ORDEN_MORADOR, sep = "-"))
+length(unique(people_medellin$participant_id_paste)) == nrow(people_medellin)
 
 #' ## Classification and translation of trip modes
 #' Nowhere in the documentation says something about the process to define the
@@ -196,6 +200,15 @@ main_mode %>% kbl() %>% kable_classic()
 #' . Last column has the hierarchy I created to define the trip main mode. The 
 #' smaller the number, the more important the mode is.
 #' 
+#' Now with respect to trip purpose, I only had to translate them. This is the
+#' result:
+#table(trips$DESC_MOTIVO_VIAJE, trips$MOTIVO_VIAJE)
+purpose <- read_excel("C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/Data/Colombia/Hierarchy.xlsx", sheet = "Cali_purpose")
+purpose %>% kbl() %>% kable_classic()
+
+#' The first two columns have been taken from the dataset, and the third column
+#' is the translation and classification of these motives. 
+#' 
 #' ## Information at stage or trip level?
 #' There is information at stage level although it seems that is not enough 
 #' because of the duration of each stage. 
@@ -204,7 +217,7 @@ main_mode %>% kbl() %>% kable_classic()
 #' destination. The person selected has ID_HOGAR = 309974, ID_MORADOR = 2 and
 #' SEC_VIAJE = 6.
 #' 
-trips_medellin %>% filter(ID_HOGAR == "309974", ID_MORADOR == "2", 
+trips %>% filter(ID_HOGAR == "309974", ID_MORADOR == "2", 
                         SEC_VIAJE == "6") %>% 
   select(ID_HOGAR, ID_MORADOR, SEC_VIAJE, HORA_O, HORA_D, DESC_MODO_TTE_E1,
          DESC_MODO_TTE_E2, DESC_MODO_TTE_E3, DESC_MODO_TTE_E4, DEC_MODO_TTE_E5,
@@ -241,22 +254,15 @@ trips_medellin %>% filter(ID_HOGAR == "309974", ID_MORADOR == "2",
 #' ## Row for each trip, translate trip_mode and create duration, sex and age
 #' Trip dataset already has a row for each trip, so I have to create the 
 #' variables I need. 
-trips_medellin_v2 <- trips_medellin %>% 
-  # I use inner join instead of left_join to remove trips that doesn't have
-  # personal information (mentioned above)
-  inner_join(people[,c("ID_HOGAR", "ORDEN_MORADOR", "EDAD", "GENERO")],
-             by = c("ID_HOGAR", "ID_MORADOR" = "ORDEN_MORADOR")) %>% 
-  mutate(participant_id = paste0(ID_HOGAR, ID_MORADOR),
-         trip_id = paste0(ID_HOGAR, ID_MORADOR, SEC_VIAJE),
-         age = EDAD,
-         sex = ifelse(GENERO == "1", "male", "female"),
+trips_v2 <- trips %>% 
+  mutate(trip_id = SEC_VIAJE,
          # Transform decimal to hours
          trip_start = ISOdatetime(1900,1,1,0,0,0, tz = "GMT") + 
-                               as.difftime(as.numeric(HORA_O)*24, 
-                                           unit = "hours"),
+           as.difftime(as.numeric(HORA_O)*24, 
+                       unit = "hours"),
          trip_end = ISOdatetime(1900,1,1,0,0,0, tz = "GMT") + 
-                             as.difftime(as.numeric(HORA_D)*24, 
-                                         unit = "hours"),
+           as.difftime(as.numeric(HORA_D)*24, 
+                       unit = "hours"),
          trip_duration = difftime(trip_end, trip_start, 
                                   units = "mins"),
          # Replace modes by its hierarchy
@@ -273,9 +279,10 @@ trips_medellin_v2 <- trips_medellin %>%
          mode_e6 = main_mode$Hierarchy[
            match(DESC_MODO_TTE_E6, main_mode$SurveyTripMode)],
          mode_e7 = main_mode$Hierarchy[
-           match(DESC_MODO_TTE_E7, main_mode$SurveyTripMode)]
-        
-  ) %>%
+           match(DESC_MODO_TTE_E7, main_mode$SurveyTripMode)],
+         trip_purpose = purpose$ITHIM[
+           match(MOTIVO_VIAJE, purpose$Code)],
+         trip_id_paste = paste(ID_HOGAR, ID_MORADOR, SEC_VIAJE, sep = "-")) %>%
   # Now compute the main mode by looking at the hierarchy
   rowwise() %>% mutate(
     main_modes = min(mode_e1, mode_e2, mode_e3, mode_e4, mode_e5, mode_e6,
@@ -284,34 +291,82 @@ trips_medellin_v2 <- trips_medellin %>%
       match(main_modes, main_mode$Hierarchy)]
   )
 
+#' I verify that there are no duplicates in trip dataset
+length(unique(trips_v2$trip_id_paste)) == nrow(trips_v2)
+
+#' In the following output I can see that there's only one duplicate and it has the same information, So I'm removing it.
+which(duplicated(trips_v2$trip_id_paste))
+trips_v2[which(duplicated(trips_v2$trip_id_paste)),]
+trips_v2[trips_v2$trip_id_paste == "1330375-1128-2612",]
+
+trips_v2 <- trips_v2[-which(duplicated(trips_v2$trip_id_paste)),]
+
+#' I verify that there are no duplicates in trip dataset
+length(unique(trips_v2$trip_id_paste)) == nrow(trips_v2)
+
 #' **ToDo: Try to implement time duration following the protocol from Bogota's**
 #' **documentation, because it takes into account differences between days.**
 #' **This file is "Caracterización de la movilidad – Encuesta de Movilidad de Bogotá 2019", page 202, paragraph 6.44**
 #' 
+#' 
+#' ## Create variables for quick report
+#' I need to create some variables to run the report that Lambed developed in 
+#' the function *quality_check*.
+report <- people_medellin %>% 
+  left_join(trips_v2, by = c("ID_HOGAR", "ORDEN_MORADOR" = "ID_MORADOR")) %>% 
+  mutate(cluster_id = 1,
+         household_id = ID_HOGAR,
+         participant_id = ORDEN_MORADOR,
+         age = EDAD,
+         sex = ifelse(GENERO == "1", "Male", "Female"),
+         participant_wt = 1,
+         meta_data = NA) %>% 
+  select(cluster_id, household_id, participant_id, sex, age, participant_wt,
+         trip_id, trip_mode, trip_duration, trip_purpose) 
+
+report$meta_data[1] <- 2293601
+report$meta_data[2] <- "..." 
+report$meta_data[3] <- "Travel Survey"
+report$meta_data[4] <- 2017
+report$meta_data[5] <- "1 day"
+report$meta_data[6] <- "Yes, but no stage duration" #Stage level data available
+report$meta_data[7] <- "All purpose"#Overall trip purpose
+report$meta_data[8] <- "Yes, but not here (yet)" # Short walks to PT
+report$meta_data[9] <- "No" # Distance available
+report$meta_data[10] <- "..." # missing modes#' 
+
+
 #' I verify that every trip has the sex and age of the person who did it. Since
 #' the sum of NAs is zero, then I can conclude that every trip has the
 #' information.
-sum(is.na(trips_medellin_v2$sex))
-sum(is.na(trips_medellin_v2$age))
-sum(is.na(trips_medellin_v2$trip_duration))
-sum(is.na(trips_medellin_v2$trip_mode))
+sum(is.na(report$sex))
+sum(is.na(report$age))
+sum(is.na(report$trip_duration))
+sum(is.na(report$trip_mode))
 
-#' ## Create variables for quick report
-#' **ToDo: see what variables are needed for quality check function**
-#' 
+#' Export dataset to make the report
+write_csv(report, 'C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/ITHIM-R/data/local/medellin_wb/medellin_trips_wb.csv')
+
 #' ## Standardize trip modes
 #' There's already a function that standardize these modes so the package can use
 #' these trips. I made sure to use translate trip modes so that the function
 #' works perfectly (take a look at the *original* variable of *smodes* dataframe
 #' in this function).
 
-trips_export <- standardize_modes(trips_medellin_v2, mode = c('trip'))
-unique(trips_medellin_v2$trip_mode)
+trips_export <- standardize_modes(report, mode = c('trip'))
+unique(report$trip_mode)
 unique(trips_export$trip_mode)
 
 #' *standardize_modes* function converts bicycle to cycle, metro to rail, and 
 #' rickshaw to auto_rickshaw.
 #'
+#' ## Creating again IDs
+trips_export <- trips_export %>% mutate(
+  participant_id = as.integer(as.factor(paste(cluster_id, household_id,
+                                              participant_id, sep = "_"))),
+  trip_id = as.integer(as.factor(paste(cluster_id, household_id,
+                                       participant_id, trip_id, sep = "_"))))
+
 #' # **Exporting phase**
 #' ## Variables to export
 #' Now I filter the columns I need
@@ -319,14 +374,11 @@ trips_export <- trips_export %>%
   select(participant_id, age, sex, trip_id, trip_mode, trip_duration)
 
 #' ## Export dataset
-#' I'm exporting this dataset to three different locations:
+#' I'm exporting this dataset to two different locations:
 #' 
 #' 1. In .../inst/exdata folder so the dataset is installed with the package
 #' 2. In Data/Colombia/Medellin/Cleaned, to have a copy 
-#' 3. in data/local/medellin_wb to export the dataset with the variables for the
-#' quick report. 
 write_csv(trips_export, 'C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/ITHIM-R/inst/extdata/local/medellin_wb/trips_medellin_wb.csv')
 write_csv(trips_export, 'C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/Data/Colombia/Medellin/Cleaned/trips_medellin_wb.csv')
-write_csv(trips_export, 'C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/ITHIM-R/data/local/medellin_wb/trips_medellin_wb.csv')
 
 

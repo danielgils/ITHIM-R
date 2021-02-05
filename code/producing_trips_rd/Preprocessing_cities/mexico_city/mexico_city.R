@@ -206,10 +206,11 @@ trips %>% filter(p5_3 == 1 & p5_7_7 == "09") %>% # Filter trips during weekdays
 #' Since the survey was conducted in multiple municipalities and I don't know yet
 #' whether we have injuries information then I will analyze both ways, one for
 #' only mexico city and other for the whole study area. 
-trips_mexico_weekday <- trips %>% filter(p5_3 == 1 & p5_7_7 == "09")
-trips_mexico_weekend <- trips %>% filter(p5_3 == 2 & p5_7_7 == "09")
+trips_weekday <- trips %>% filter(p5_3 == 1)
+trips_weekend <- trips %>% filter(p5_3 == 2)
 
 people_mexico <- people %>% filter(ent == "09") 
+
 #' ## Classification and translation of trip modes and purpose
 #' Even though there's enough information at stage level, I still need to define
 #' the main mode for each trip. So I made a hierarchy to get it and translate it
@@ -220,7 +221,7 @@ main_mode %>% kbl() %>% kable_classic()
 #' I need to create some variables to run the report that Lambed developed in 
 #' the function *quality_check*.
 report_weekday <- people_mexico %>% 
-  left_join(trips_mexico_weekday, by = "id_soc") %>% 
+  left_join(trips_weekday, by = "id_soc") %>% 
   mutate(cluster_id = 1,
          household_id = id_hog,
          participant_id = id_soc,
