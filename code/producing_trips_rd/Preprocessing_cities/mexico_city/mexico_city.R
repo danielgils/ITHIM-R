@@ -109,7 +109,7 @@ people <- read_csv(paste0(route, "tsdem_eod2017/conjunto_de_datos/tsdem.csv"))
 trips <- read_csv(paste0(route, "tviaje_eod2017/conjunto_de_datos/tviaje.csv"))
 
 #+ warning=FALSE, message=FALSE, cache=TRUE
-# Trips
+# Stages
 stages <- read_csv(paste0(route, "ttransporte_eod2017/conjunto_de_datos/ttransporte.csv"))
 
 #' ### Total houses, households and people
@@ -202,14 +202,18 @@ trips %>% filter(p5_3 == 1 & p5_7_7 == "09") %>% # Filter trips during weekdays
 
 
 #' # **Preprocessing phase**
-#' ## Filtering Bogota trips only
+#' ## Filtering people from Mexico city only
 #' Since the survey was conducted in multiple municipalities and I don't know yet
-#' whether we have injuries information then I will analyze both ways, one for
-#' only mexico city and other for the whole study area. 
+#' whether we have injuries information then I will analyze only mexico city.
 trips_weekday <- trips %>% filter(p5_3 == 1)
 trips_weekend <- trips %>% filter(p5_3 == 2)
 
 people_mexico <- people %>% filter(ent == "09") 
+names(people)
+#' I verify that there are no duplicates in people dataset
+people_mexico <- people_mexico %>% 
+  mutate(participant_id_paste = paste(id_hog, id_soc, sep = "-"))
+length(unique(people_mexico$participant_id_paste)) == nrow(people_mexico)
 
 #' ## Classification and translation of trip modes and purpose
 #' Even though there's enough information at stage level, I still need to define
@@ -217,113 +221,203 @@ people_mexico <- people %>% filter(ent == "09")
 main_mode <- read_excel("C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/Data/Mexico/Hierarchy.xlsx", sheet = "MexicoCity")
 main_mode %>% kbl() %>% kable_classic()
 
-#' ## Create variables for quick report
-#' I need to create some variables to run the report that Lambed developed in 
-#' the function *quality_check*.
-report_weekday <- people_mexico %>% 
-  left_join(trips_weekday, by = "id_soc") %>% 
-  mutate(cluster_id = 1,
-         household_id = id_hog,
-         participant_id = id_soc,
-         trip_id = id_via,
-         age = as.numeric(edad.x),
-         sex = ifelse(sexo.x == 1, "Male", "Female"),
+#' The first two columns of this table have been defined in the data dictionary,
+#' so I created the equivalence to Ithim taking into account travel modes defined in standardized_modes file (.../ITHIM-R/data/global/modes/standardized_modes.csv). The last column correspond to Lambed's classification.
+#' 
+#' Now with respect to trip purpose, I only had to translate them. This is the
+#' result:
+purpose <- read_excel("C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/Data/Mexico/Hierarchy.xlsx", sheet = "MexicoCity_purpose")
+purpose %>% kbl() %>% kable_classic()
+
+#' The first two columns have been taken from the data dictionary,
+#' and the third column is the translation and classification of these motives. 
+#' Last column correspond to what Lambed defined.
+
+#' ## Information at stage or trip level?
+#' There is enough information at stage level so I have to clean everything at 
+#' this level.
+#' 
+#' For now, I will use the information at trip level to continue working as in
+#' the other cities. 
+#' **ToDo: I have to leave this dataset at stage level and explain here how is the information saved in these datasets.**
+#' 
+#' ## Row for each trip, translate trip_mode and create duration, sex and age
+#' Trip dataset already has a row for each trip, so I have to create the 
+#' variables I need. 
+#' 
+#' Before computing time duration I saw whether the people that have 99 don't
+#' have other information so we can assign them 0.
+identical(which(trips_weekday$p5_9_1 == "99"),
+          which(trips_weekday$p5_9_2 == "99"))
+
+identical(which(trips_weekday$p5_10_1 == "99"),
+          which(trips_weekday$p5_10_2 == "99"))
+
+identical(which(trips_weekday$p5_9_1 == "99"),
+          which(trips_weekday$p5_10_2 == "99"))
+
+#' Since the three comparisons indicate that the people that have 99 is the same
+#' in all variables, then I will assign them 0 minutes.
+#' 
+#' Then I will see whether there are NAs in trip mode variables. The following
+#' output suggest that there are not. Then I can just simply categorize them by
+#' hierarchy
+for (i in 1:20) {
+  if (i < 10) 
+    print(sum(is.na(trips_weekday %>% select(paste0("p5_14_0",i)))))
+  else
+    print(sum(is.na(trips_weekday %>% select(paste0("p5_14_",i)))))
+}
+
+#' I create the trip varibles that I need in the **weekday** dataset
+trips_weekday_v2 <- trips_weekday %>% 
+  mutate(trip_id = id_via,
          p5_9_1 = as.numeric(p5_9_1),
          p5_9_2 = as.numeric(p5_9_2),
          p5_10_1 = as.numeric(p5_10_1),
          p5_10_2 = as.numeric(p5_10_2),
-         trip_duration = ifelse((is.na(p5_9_1) | p5_9_1 == 99) | 
-                                   (is.na(p5_9_2) | p5_9_2 == 99) | 
-                                   (is.na(p5_10_1) | p5_10_1 == 99) | 
-                                   (is.na(p5_10_2) | p5_10_2 == 99),
-                                 0,
-                                 as.numeric(difftime(strptime(paste(p5_10_1,p5_10_2, sep = ":"),"%H:%M"), strptime(paste(p5_9_1,p5_9_2, sep = ":"),"%H:%M")))),
-         trip_duration = ifelse(is.na(p5_9_1) | is.na(p5_9_2) |
-                                  is.na(p5_10_1) | is.na(p5_10_2), NA,
-                                trip_duration),
+         trip_duration = ifelse(p5_10_2 == "99", 0, 
+                                as.numeric(difftime(strptime(paste(p5_10_1,p5_10_2, sep = ":"),"%H:%M"), strptime(paste(p5_9_1,p5_9_2, sep = ":"),"%H:%M")))),
          # Defining hierarchy
-         auto = ifelse(is.na(p5_14_01), NA, 
-                       ifelse(p5_14_01 == 1, 
-                              main_mode$Hierarchy[main_mode$Code == "01"], 99)),
-         colectivo = ifelse(is.na(p5_14_02), NA, 
-                            ifelse(p5_14_02 == 1, 
-                                   main_mode$Hierarchy[main_mode$Code == "02"], 99)),
-         taxi_app = ifelse(is.na(p5_14_03), NA, 
-                            ifelse(p5_14_03 == 1, 
-                                   main_mode$Hierarchy[main_mode$Code == "03"], 99)),
-         taxi = ifelse(is.na(p5_14_04), NA, 
-                            ifelse(p5_14_04 == 1, 
-                                   main_mode$Hierarchy[main_mode$Code == "04"], 99)),
-         metro = ifelse(is.na(p5_14_05), NA, 
-                            ifelse(p5_14_05 == 1, 
-                                   main_mode$Hierarchy[main_mode$Code == "05"], 99)),
-         autobus_m1 = ifelse(is.na(p5_14_06), NA, 
-                            ifelse(p5_14_06 == 1, 
-                                   main_mode$Hierarchy[main_mode$Code == "06"], 99)),
-         bicicleta = ifelse(is.na(p5_14_07), NA, 
-                            ifelse(p5_14_07 == 1, 
-                                   main_mode$Hierarchy[main_mode$Code == "07"], 99)),
-         autobus = ifelse(is.na(p5_14_08), NA, 
-                            ifelse(p5_14_08 == 1, 
-                                   main_mode$Hierarchy[main_mode$Code == "08"], 99)),
-         moto = ifelse(is.na(p5_14_09), NA, 
-                            ifelse(p5_14_09 == 1, 
-                                   main_mode$Hierarchy[main_mode$Code == "09"], 99)),
-         trolebus = ifelse(is.na(p5_14_10), NA, 
-                            ifelse(p5_14_10 == 1, 
-                                   main_mode$Hierarchy[main_mode$Code == "10"], 99)),
-         metrobus = ifelse(is.na(p5_14_11), NA, 
-                            ifelse(p5_14_11 == 1, 
-                                   main_mode$Hierarchy[main_mode$Code == "11"], 99)),
-         tren_ligero = ifelse(is.na(p5_14_12), NA, 
-                            ifelse(p5_14_12 == 1, 
-                                   main_mode$Hierarchy[main_mode$Code == "12"], 99)),
-         tren_sub = ifelse(is.na(p5_14_13), NA, 
-                            ifelse(p5_14_13 == 1, 
-                                   main_mode$Hierarchy[main_mode$Code == "13"], 99)),
-         camina = ifelse(is.na(p5_14_14), NA, 
-                            ifelse(p5_14_14 == 1, 
-                                   main_mode$Hierarchy[main_mode$Code == "14"], 99)),
-         mexicable = ifelse(is.na(p5_14_15), NA, 
-                         ifelse(p5_14_15 == 1, 
-                                main_mode$Hierarchy[main_mode$Code == "15"], 99)),
-         bicitaxi = ifelse(is.na(p5_14_16), NA, 
-                            ifelse(p5_14_16 == 1, 
-                                   main_mode$Hierarchy[main_mode$Code == "16"], 99)),
-         mototaxi = ifelse(is.na(p5_14_17), NA, 
-                            ifelse(p5_14_17 == 1, 
-                                   main_mode$Hierarchy[main_mode$Code == "17"], 99)),
-         escolar = ifelse(is.na(p5_14_18), NA, 
-                            ifelse(p5_14_18 == 1, 
-                                   main_mode$Hierarchy[main_mode$Code == "18"], 99)),
-         personal = ifelse(is.na(p5_14_19), NA, 
-                            ifelse(p5_14_19 == 1, 
-                                   main_mode$Hierarchy[main_mode$Code == "19"], 99)),
-         otro = ifelse(is.na(p5_14_20), NA, 
-                            ifelse(p5_14_20 == 1, 
-                                   main_mode$Hierarchy[main_mode$Code == "20"], 99)),
-         participant_wt = factor.x,
-         trip_purpose = "work") %>% 
+         auto = ifelse(p5_14_01 == 1, 
+                       main_mode$Hierarchy[main_mode$Code == "01"], 99),
+         colectivo = ifelse(p5_14_02 == 1, 
+                            main_mode$Hierarchy[main_mode$Code == "02"], 99),
+         taxi_app = ifelse(p5_14_03 == 1, 
+                           main_mode$Hierarchy[main_mode$Code == "03"], 99),
+         taxi = ifelse(p5_14_04 == 1, 
+                       main_mode$Hierarchy[main_mode$Code == "04"], 99),
+         metro = ifelse(p5_14_05 == 1, 
+                        main_mode$Hierarchy[main_mode$Code == "05"], 99),
+         autobus_m1 = ifelse(p5_14_06 == 1, 
+                             main_mode$Hierarchy[main_mode$Code == "06"], 99),
+         bicicleta = ifelse(p5_14_07 == 1, 
+                            main_mode$Hierarchy[main_mode$Code == "07"], 99),
+         autobus = ifelse(p5_14_08 == 1, 
+                          main_mode$Hierarchy[main_mode$Code == "08"], 99),
+         moto = ifelse(p5_14_09 == 1, 
+                       main_mode$Hierarchy[main_mode$Code == "09"], 99),
+         trolebus = ifelse(p5_14_10 == 1, 
+                           main_mode$Hierarchy[main_mode$Code == "10"], 99),
+         metrobus = ifelse(p5_14_11 == 1, 
+                           main_mode$Hierarchy[main_mode$Code == "11"], 99),
+         tren_ligero = ifelse(p5_14_12 == 1, 
+                              main_mode$Hierarchy[main_mode$Code == "12"], 99),
+         tren_sub = ifelse(p5_14_13 == 1, 
+                           main_mode$Hierarchy[main_mode$Code == "13"], 99),
+         camina = ifelse(p5_14_14 == 1, 
+                         main_mode$Hierarchy[main_mode$Code == "14"], 99),
+         mexicable = ifelse(p5_14_15 == 1, 
+                            main_mode$Hierarchy[main_mode$Code == "15"], 99),
+         bicitaxi = ifelse(p5_14_16 == 1, 
+                           main_mode$Hierarchy[main_mode$Code == "16"], 99),
+         mototaxi = ifelse(p5_14_17 == 1, 
+                           main_mode$Hierarchy[main_mode$Code == "17"], 99),
+         escolar = ifelse(p5_14_18 == 1, 
+                          main_mode$Hierarchy[main_mode$Code == "18"], 99),
+         personal = ifelse(p5_14_19 == 1, 
+                           main_mode$Hierarchy[main_mode$Code == "19"], 99),
+         otro = ifelse(p5_14_20 == 1, 
+                       main_mode$Hierarchy[main_mode$Code == "20"], 99),
+         trip_purpose = purpose$ITHIM[
+           match(p5_13, purpose$Code)]) %>% 
   # Now compute the main mode by looking at the hierarchy
   rowwise() %>% mutate(
-    main_modes = ifelse(is.na(auto) & is.na(colectivo) & is.na(taxi_app) & 
-                         is.na(taxi) & is.na(metro) & is.na(autobus_m1) & 
-                         is.na(bicicleta) & is.na(autobus) & is.na(moto) & 
-                         is.na(trolebus) & is.na(metrobus) & is.na(tren_ligero) &
-                         is.na(tren_sub) & is.na(camina) & is.na(mexicable) & 
-                         is.na(bicitaxi) & is.na(mototaxi) & is.na(escolar) & 
-                         is.na(personal) & is.na(otro), NA,
-      min(auto, colectivo, taxi_app, taxi, metro, autobus_m1,
-                    bicicleta, autobus, moto, trolebus, metrobus, tren_ligero,
-                    tren_sub, camina, mexicable, bicitaxi, mototaxi, escolar,
-                    personal, otro, na.rm = T)),
-    trip_mode = ifelse(is.na(main_modes), NA, main_mode$ITHIM[
-      match(main_modes, main_mode$Hierarchy)])) %>% 
+    main_modes = min(auto, colectivo, taxi_app, taxi, metro, autobus_m1,
+                     bicicleta, autobus, moto, trolebus, metrobus,
+                     tren_ligero,tren_sub, camina, mexicable, bicitaxi,
+                     mototaxi, escolar, personal, otro, na.rm = T),
+    trip_mode = main_mode$ITHIM[match(main_modes, main_mode$Hierarchy)],
+    trip_id_paste = paste(id_soc, id_via, sep = "-")) 
+
+#' I verify that there are no duplicates in trip dataset
+length(unique(trips_weekday_v2$trip_id_paste)) == nrow(trips_weekday_v2)
+
+#'
+#' I create the trip varibles that I need in the **weekend** dataset
+trips_weekend_v2 <- trips_weekend %>% 
+  mutate(trip_id = id_via,
+         p5_9_1 = as.numeric(p5_9_1),
+         p5_9_2 = as.numeric(p5_9_2),
+         p5_10_1 = as.numeric(p5_10_1),
+         p5_10_2 = as.numeric(p5_10_2),
+         trip_duration = ifelse(p5_10_2 == "99", 0, 
+                                as.numeric(difftime(strptime(paste(p5_10_1,p5_10_2, sep = ":"),"%H:%M"), strptime(paste(p5_9_1,p5_9_2, sep = ":"),"%H:%M")))),
+         # Defining hierarchy
+         auto = ifelse(p5_14_01 == 1, 
+                       main_mode$Hierarchy[main_mode$Code == "01"], 99),
+         colectivo = ifelse(p5_14_02 == 1, 
+                            main_mode$Hierarchy[main_mode$Code == "02"], 99),
+         taxi_app = ifelse(p5_14_03 == 1, 
+                           main_mode$Hierarchy[main_mode$Code == "03"], 99),
+         taxi = ifelse(p5_14_04 == 1, 
+                       main_mode$Hierarchy[main_mode$Code == "04"], 99),
+         metro = ifelse(p5_14_05 == 1, 
+                        main_mode$Hierarchy[main_mode$Code == "05"], 99),
+         autobus_m1 = ifelse(p5_14_06 == 1, 
+                             main_mode$Hierarchy[main_mode$Code == "06"], 99),
+         bicicleta = ifelse(p5_14_07 == 1, 
+                            main_mode$Hierarchy[main_mode$Code == "07"], 99),
+         autobus = ifelse(p5_14_08 == 1, 
+                          main_mode$Hierarchy[main_mode$Code == "08"], 99),
+         moto = ifelse(p5_14_09 == 1, 
+                       main_mode$Hierarchy[main_mode$Code == "09"], 99),
+         trolebus = ifelse(p5_14_10 == 1, 
+                           main_mode$Hierarchy[main_mode$Code == "10"], 99),
+         metrobus = ifelse(p5_14_11 == 1, 
+                           main_mode$Hierarchy[main_mode$Code == "11"], 99),
+         tren_ligero = ifelse(p5_14_12 == 1, 
+                              main_mode$Hierarchy[main_mode$Code == "12"], 99),
+         tren_sub = ifelse(p5_14_13 == 1, 
+                           main_mode$Hierarchy[main_mode$Code == "13"], 99),
+         camina = ifelse(p5_14_14 == 1, 
+                         main_mode$Hierarchy[main_mode$Code == "14"], 99),
+         mexicable = ifelse(p5_14_15 == 1, 
+                            main_mode$Hierarchy[main_mode$Code == "15"], 99),
+         bicitaxi = ifelse(p5_14_16 == 1, 
+                           main_mode$Hierarchy[main_mode$Code == "16"], 99),
+         mototaxi = ifelse(p5_14_17 == 1, 
+                           main_mode$Hierarchy[main_mode$Code == "17"], 99),
+         escolar = ifelse(p5_14_18 == 1, 
+                          main_mode$Hierarchy[main_mode$Code == "18"], 99),
+         personal = ifelse(p5_14_19 == 1, 
+                           main_mode$Hierarchy[main_mode$Code == "19"], 99),
+         otro = ifelse(p5_14_20 == 1, 
+                       main_mode$Hierarchy[main_mode$Code == "20"], 99),
+         trip_purpose = purpose$ITHIM[
+           match(p5_13, purpose$Code)]) %>% 
+  # Now compute the main mode by looking at the hierarchy
+  rowwise() %>% mutate(
+    main_modes = min(auto, colectivo, taxi_app, taxi, metro, autobus_m1,
+                     bicicleta, autobus, moto, trolebus, metrobus,
+                     tren_ligero,tren_sub, camina, mexicable, bicitaxi,
+                     mototaxi, escolar, personal, otro, na.rm = T),
+    trip_mode = main_mode$ITHIM[match(main_modes, main_mode$Hierarchy)],
+    trip_id_paste = paste(id_soc, id_via, sep = "-")) 
+
+#' I verify that there are no duplicates in trip dataset
+length(unique(trips_weekend_v2$trip_id_paste)) == nrow(trips_weekend_v2)
+
+#' In both datasets there's only one row per trip, then we can continue
+#' 
+#' ## Create variables for quick report
+#' I need to create some variables to run the report that Lambed developed in 
+#' the function *quality_check*.
+#' 
+#' ### Weekday
+report_weekday <- people_mexico %>% 
+  rename(f_exp = factor) %>% 
+  left_join(trips_weekday_v2, by = "id_soc") %>% 
+  mutate(cluster_id = 1,
+         household_id = id_hog,
+         participant_id = id_soc,
+         age = as.numeric(edad.x),
+         sex = ifelse(sexo.x == 1, "Male", "Female"),
+         participant_wt = f_exp,
+         meta_data = NA) %>% 
   select(cluster_id, household_id, participant_id, sex, age, participant_wt,
          trip_id, trip_mode, trip_duration, trip_purpose)
 
-
-report_weekday$meta_data <- NA
 report_weekday$meta_data[1] <- 20976700
 report_weekday$meta_data[2] <- 19239
 report_weekday$meta_data[3] <- "Travel Survey"
@@ -335,117 +429,31 @@ report_weekday$meta_data[8] <- "Yes" # Short walks to PT
 report_weekday$meta_data[9] <- "No" # Distance available
 report_weekday$meta_data[10] <- "" # missing modes
 
+#' I verify that every trip has the sex and age of the person who did it. Since
+#' the sum of NAs is zero, then I can conclude that every trip has the
+#' information.
+sum(is.na(report_weekday$sex))
+sum(is.na(report_weekday$age))
+sum(is.na(report_weekday$trip_duration))
+sum(is.na(report_weekday$trip_mode))
 
 #' Export dataset to make the report
-write_csv(report_weekday, 'C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/ITHIM-R/data/local/mexico_city_wb/mexico_city_trips_wb.csv')
+write_csv(report_weekday, 'C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/ITHIM-R/data/local/mexico_city_wb/mexico_city_trips_weekday_wb.csv')
 
-#' ## Weekends
-#' I need to create some variables to run the report that Lambed developed in 
-#' the function *quality_check*.
+#' ### Weekend
 report_weekend <- people_mexico %>% 
-  left_join(trips_mexico_weekend, by = "id_soc") %>% 
+  rename(f_exp = factor) %>% 
+  left_join(trips_weekend_v2, by = "id_soc") %>% 
   mutate(cluster_id = 1,
          household_id = id_hog,
          participant_id = id_soc,
-         trip_id = id_via,
          age = as.numeric(edad.x),
          sex = ifelse(sexo.x == 1, "Male", "Female"),
-         p5_9_1 = as.numeric(p5_9_1),
-         p5_9_2 = as.numeric(p5_9_2),
-         p5_10_1 = as.numeric(p5_10_1),
-         p5_10_2 = as.numeric(p5_10_2),
-         trip_duration = ifelse((is.na(p5_9_1) | p5_9_1 == 99) | 
-                                  (is.na(p5_9_2) | p5_9_2 == 99) | 
-                                  (is.na(p5_10_1) | p5_10_1 == 99) | 
-                                  (is.na(p5_10_2) | p5_10_2 == 99),
-                                0,
-                                as.numeric(difftime(strptime(paste(p5_10_1,p5_10_2, sep = ":"),"%H:%M"), strptime(paste(p5_9_1,p5_9_2, sep = ":"),"%H:%M")))),
-         trip_duration = ifelse(is.na(p5_9_1) | is.na(p5_9_2) |
-                                  is.na(p5_10_1) | is.na(p5_10_2), NA,
-                                trip_duration),
-         # Defining hierarchy
-         auto = ifelse(is.na(p5_14_01), NA, 
-                       ifelse(p5_14_01 == 1, 
-                              main_mode$Hierarchy[main_mode$Code == "01"], 99)),
-         colectivo = ifelse(is.na(p5_14_02), NA, 
-                            ifelse(p5_14_02 == 1, 
-                                   main_mode$Hierarchy[main_mode$Code == "02"], 99)),
-         taxi_app = ifelse(is.na(p5_14_03), NA, 
-                           ifelse(p5_14_03 == 1, 
-                                  main_mode$Hierarchy[main_mode$Code == "03"], 99)),
-         taxi = ifelse(is.na(p5_14_04), NA, 
-                       ifelse(p5_14_04 == 1, 
-                              main_mode$Hierarchy[main_mode$Code == "04"], 99)),
-         metro = ifelse(is.na(p5_14_05), NA, 
-                        ifelse(p5_14_05 == 1, 
-                               main_mode$Hierarchy[main_mode$Code == "05"], 99)),
-         autobus_m1 = ifelse(is.na(p5_14_06), NA, 
-                             ifelse(p5_14_06 == 1, 
-                                    main_mode$Hierarchy[main_mode$Code == "06"], 99)),
-         bicicleta = ifelse(is.na(p5_14_07), NA, 
-                            ifelse(p5_14_07 == 1, 
-                                   main_mode$Hierarchy[main_mode$Code == "07"], 99)),
-         autobus = ifelse(is.na(p5_14_08), NA, 
-                          ifelse(p5_14_08 == 1, 
-                                 main_mode$Hierarchy[main_mode$Code == "08"], 99)),
-         moto = ifelse(is.na(p5_14_09), NA, 
-                       ifelse(p5_14_09 == 1, 
-                              main_mode$Hierarchy[main_mode$Code == "09"], 99)),
-         trolebus = ifelse(is.na(p5_14_10), NA, 
-                           ifelse(p5_14_10 == 1, 
-                                  main_mode$Hierarchy[main_mode$Code == "10"], 99)),
-         metrobus = ifelse(is.na(p5_14_11), NA, 
-                           ifelse(p5_14_11 == 1, 
-                                  main_mode$Hierarchy[main_mode$Code == "11"], 99)),
-         tren_ligero = ifelse(is.na(p5_14_12), NA, 
-                              ifelse(p5_14_12 == 1, 
-                                     main_mode$Hierarchy[main_mode$Code == "12"], 99)),
-         tren_sub = ifelse(is.na(p5_14_13), NA, 
-                           ifelse(p5_14_13 == 1, 
-                                  main_mode$Hierarchy[main_mode$Code == "13"], 99)),
-         camina = ifelse(is.na(p5_14_14), NA, 
-                         ifelse(p5_14_14 == 1, 
-                                main_mode$Hierarchy[main_mode$Code == "14"], 99)),
-         mexicable = ifelse(is.na(p5_14_15), NA, 
-                            ifelse(p5_14_15 == 1, 
-                                   main_mode$Hierarchy[main_mode$Code == "15"], 99)),
-         bicitaxi = ifelse(is.na(p5_14_16), NA, 
-                           ifelse(p5_14_16 == 1, 
-                                  main_mode$Hierarchy[main_mode$Code == "16"], 99)),
-         mototaxi = ifelse(is.na(p5_14_17), NA, 
-                           ifelse(p5_14_17 == 1, 
-                                  main_mode$Hierarchy[main_mode$Code == "17"], 99)),
-         escolar = ifelse(is.na(p5_14_18), NA, 
-                          ifelse(p5_14_18 == 1, 
-                                 main_mode$Hierarchy[main_mode$Code == "18"], 99)),
-         personal = ifelse(is.na(p5_14_19), NA, 
-                           ifelse(p5_14_19 == 1, 
-                                  main_mode$Hierarchy[main_mode$Code == "19"], 99)),
-         otro = ifelse(is.na(p5_14_20), NA, 
-                       ifelse(p5_14_20 == 1, 
-                              main_mode$Hierarchy[main_mode$Code == "20"], 99)),
-         participant_wt = factor.x,
-         trip_purpose = "work") %>% 
-  # Now compute the main mode by looking at the hierarchy
-  rowwise() %>% mutate(
-    main_modes = ifelse(is.na(auto) & is.na(colectivo) & is.na(taxi_app) & 
-                          is.na(taxi) & is.na(metro) & is.na(autobus_m1) & 
-                          is.na(bicicleta) & is.na(autobus) & is.na(moto) & 
-                          is.na(trolebus) & is.na(metrobus) & is.na(tren_ligero) &
-                          is.na(tren_sub) & is.na(camina) & is.na(mexicable) & 
-                          is.na(bicitaxi) & is.na(mototaxi) & is.na(escolar) & 
-                          is.na(personal) & is.na(otro), NA,
-                        min(auto, colectivo, taxi_app, taxi, metro, autobus_m1,
-                            bicicleta, autobus, moto, trolebus, metrobus, tren_ligero,
-                            tren_sub, camina, mexicable, bicitaxi, mototaxi, escolar,
-                            personal, otro, na.rm = T)),
-    trip_mode = ifelse(is.na(main_modes), NA, main_mode$ITHIM[
-      match(main_modes, main_mode$Hierarchy)])) %>% 
+         participant_wt = f_exp,
+         meta_data = NA) %>% 
   select(cluster_id, household_id, participant_id, sex, age, participant_wt,
          trip_id, trip_mode, trip_duration, trip_purpose)
 
-
-report_weekend$meta_data <- NA
 report_weekend$meta_data[1] <- 20976700
 report_weekend$meta_data[2] <- 19239
 report_weekend$meta_data[3] <- "Travel Survey"
@@ -457,7 +465,49 @@ report_weekend$meta_data[8] <- "Yes" # Short walks to PT
 report_weekend$meta_data[9] <- "No" # Distance available
 report_weekend$meta_data[10] <- "" # missing modes
 
+#' I verify that every trip has the sex and age of the person who did it. Since
+#' the sum of NAs is zero, then I can conclude that every trip has the
+#' information.
+sum(is.na(report_weekend$sex))
+sum(is.na(report_weekend$age))
+sum(is.na(report_weekend$trip_duration))
+sum(is.na(report_weekend$trip_mode))
 
 #' Export dataset to make the report
-write_csv(report_weekend, 'C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/ITHIM-R/data/local/mexico_city_wb/mexico_city_trips_wb2.csv')
+write_csv(report_weekend, 'C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/ITHIM-R/data/local/mexico_city_wb/mexico_city_trips_weekend_wb.csv')
+
+#' ## Standardize trip modes
+#' There's already a function that standardize these modes so the package can use
+#' these trips. I made sure to use translate trip modes so that the function
+#' works perfectly (take a look at the *original* variable of *smodes* dataframe
+#' in this function).
+
+trips_export <- standardize_modes(report_weekday, mode = c('trip'))
+unique(report_weekday$trip_mode)
+unique(trips_export$trip_mode)
+
+#' *standardize_modes* function converts walk to pedestrian, bicycle to cycle,
+#' metro to rail, van to car, and rickshaw to auto_rickshaw.
+#' 
+#' ## Creating again IDs
+trips_export <- trips_export %>% mutate(
+  participant_id = as.integer(as.factor(paste(cluster_id, household_id,
+                                              participant_id, sep = "_"))),
+  trip_id = as.integer(as.factor(paste(cluster_id, household_id,
+                                       participant_id, trip_id, sep = "_"))))
+
+#' # **Exporting phase**
+#' ## Variables to export
+#' Now I filter the columns I need
+trips_export <- trips_export %>% 
+  select(participant_id, age, sex, trip_id, trip_mode, trip_duration)
+
+#' ## Export dataset
+#' I'm exporting this dataset to two different locations:
+#' 
+#' 1. In .../inst/exdata folder so the dataset is installed with the package
+#' 2. In Data/Colombia/Medellin/Cleaned, to have a copy 
+#' quick report. 
+write_csv(trips_export, 'C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/ITHIM-R/inst/extdata/local/mexico_city_wb/trips_mexico_city_wb.csv')
+write_csv(trips_export, 'C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/Data/Mexico/MexicoCity/Cleaned/trips_mexico_city_wb.csv')
 
