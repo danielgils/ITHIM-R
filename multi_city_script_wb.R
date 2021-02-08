@@ -3,7 +3,7 @@ rm(list=ls())
 cities <- c('accra', 'bangalore', 'belo_horizonte', 'bogota', 'buenos_aires', 'cape_town',
             'delhi', 'mexico_city', 'santiago', 'sao_paulo', 'vizag', 'medellin_wb')
 
-# cities <- c('bogota')
+cities <- c('bogota', "mexico_city")
 
 min_age <- 15
 max_age <- 69
@@ -19,7 +19,7 @@ parameter_stops <- c(parameter_starts[-1] - 1, nrow(all_inputs))
 parameter_names <- parameter_names[parameter_names!='']
 parameter_list <- list()
 compute_mode <- 'constant'
-for(i in 1:length(parameter_names)){
+for (i in 1:length(parameter_names)) {
   parameter_list[[parameter_names[i]]] <- list()
   parameter_index <- which(all_inputs$parameter==parameter_names[i])
   if(all_inputs[parameter_index,2]=='')  {
