@@ -11,7 +11,7 @@
 
 <meta name="author" content="Daniel" />
 
-<meta name="date" content="2021-02-04" />
+<meta name="date" content="2021-02-09" />
 
 <title>Preprocessing of Medellin’s travel dataset</title>
 
@@ -1707,7 +1707,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">Preprocessing of Medellin’s travel dataset</h1>
 <h4 class="author">Daniel</h4>
-<h4 class="date">2021-02-04</h4>
+<h4 class="date">2021-02-09</h4>
 
 </div>
 
@@ -1715,8 +1715,8 @@ div.tocify {
 <div id="understanding-phase" class="section level1">
 <h1><strong>Understanding phase</strong></h1>
 <pre><code>##           used (Mb) gc trigger  (Mb) max used (Mb)
-## Ncells  999478 53.4    2051151 109.6  1289624 68.9
-## Vcells 1680465 12.9    8388608  64.0  2154499 16.5</code></pre>
+## Ncells  999470 53.4    2051130 109.6  1289621 68.9
+## Vcells 1680463 12.9    8388608  64.0  2154526 16.5</code></pre>
 <div id="documentation" class="section level2">
 <h2>Documentation</h2>
 <p>Documentation is located in “…/Colombia/Medellin/EOD2017”. These files were obtained from <a href="https://datosabiertos.metropol.gov.co/" class="uri">https://datosabiertos.metropol.gov.co/</a> but also sent to me from the project of WWF. I looked for information with more detail and the only thing that is published is this dashboard: <a href="https://www.metropol.gov.co/observatorio/Paginas/encuestaorigendestino.aspx" class="uri">https://www.metropol.gov.co/observatorio/Paginas/encuestaorigendestino.aspx</a></p>
@@ -1817,13 +1817,13 @@ Encuesta Movilidad_Valle de Aburrá_ 2017.pdf
 <pre class="r"><code>route &lt;- &quot;C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/Data/Colombia/Medellin/EOD2017/&quot;</code></pre>
 <pre class="r"><code># Households (hh)
 hh &lt;- read_excel(paste0(route, &quot;EOD_2017_DatosViajes.xlsx&quot;), 
-                        sheet = &quot;DATOS HOGARES&quot;, col_types = &quot;text&quot;) 
+                        sheet = &quot;DATOS HOGARES&quot;) 
 # People
 people &lt;- read_excel(paste0(route, &quot;EOD_2017_DatosViajes.xlsx&quot;),
-                            sheet = &quot;DATOS MORADORES&quot;, col_types = &quot;text&quot;)
+                            sheet = &quot;DATOS MORADORES&quot;)
 # Trips
 trips &lt;- read_excel(paste0(route, &quot;EOD_2017_DatosViajes.xlsx&quot;), 
-                           sheet = &quot;DATOS VIAJES&quot;, col_types = &quot;text&quot;)
+                           sheet = &quot;DATOS VIAJES&quot;)
 trips &lt;- trips[rowSums(is.na(trips)) != ncol(trips), ] # Removing blank rows</code></pre>
 </div>
 <div id="number-of-rows" class="section level3">
@@ -1844,96 +1844,84 @@ trips &lt;- trips[rowSums(is.na(trips)) != ncol(trips), ] # Removing blank rows<
 <pre class="r"><code>length(unique(trips$ID_HOGAR)) == nrow(hh)</code></pre>
 <pre><code>## [1] FALSE</code></pre>
 <pre class="r"><code>hh$ID_HOGAR[!hh$ID_HOGAR %in% c(trips$ID_HOGAR)]</code></pre>
-<pre><code>##   [1] &quot;3428&quot;    &quot;4289&quot;    &quot;13146&quot;   &quot;14949&quot;   &quot;22764&quot;   &quot;23830&quot;   &quot;24420&quot;  
-##   [8] &quot;37073&quot;   &quot;47162&quot;   &quot;53174&quot;   &quot;56379&quot;   &quot;58697&quot;   &quot;66144&quot;   &quot;67418&quot;  
-##  [15] &quot;69591&quot;   &quot;70750&quot;   &quot;73422&quot;   &quot;73632&quot;   &quot;76269&quot;   &quot;78985&quot;   &quot;83654&quot;  
-##  [22] &quot;87058&quot;   &quot;87421&quot;   &quot;94410&quot;   &quot;95776&quot;   &quot;109663&quot;  &quot;122304&quot;  &quot;124303&quot; 
-##  [29] &quot;124996&quot;  &quot;129685&quot;  &quot;131137&quot;  &quot;137595&quot;  &quot;138426&quot;  &quot;139439&quot;  &quot;140997&quot; 
-##  [36] &quot;141274&quot;  &quot;141319&quot;  &quot;144091&quot;  &quot;144675&quot;  &quot;145791&quot;  &quot;147060&quot;  &quot;147520&quot; 
-##  [43] &quot;148344&quot;  &quot;148716&quot;  &quot;152206&quot;  &quot;153049&quot;  &quot;166094&quot;  &quot;172062&quot;  &quot;175460&quot; 
-##  [50] &quot;177114&quot;  &quot;179073&quot;  &quot;224710&quot;  &quot;230141&quot;  &quot;232210&quot;  &quot;232606&quot;  &quot;234521&quot; 
-##  [57] &quot;236141&quot;  &quot;238448&quot;  &quot;239186&quot;  &quot;241515&quot;  &quot;242124&quot;  &quot;242567&quot;  &quot;250757&quot; 
-##  [64] &quot;257753&quot;  &quot;263497&quot;  &quot;274098&quot;  &quot;274741&quot;  &quot;279363&quot;  &quot;285394&quot;  &quot;293486&quot; 
-##  [71] &quot;296422&quot;  &quot;300098&quot;  &quot;300936&quot;  &quot;302951&quot;  &quot;305914&quot;  &quot;310970&quot;  &quot;315987&quot; 
-##  [78] &quot;322767&quot;  &quot;323131&quot;  &quot;330111&quot;  &quot;333796&quot;  &quot;336038&quot;  &quot;356069&quot;  &quot;367770&quot; 
-##  [85] &quot;369511&quot;  &quot;374937&quot;  &quot;376872&quot;  &quot;377136&quot;  &quot;379078&quot;  &quot;411254&quot;  &quot;416545&quot; 
-##  [92] &quot;417411&quot;  &quot;418981&quot;  &quot;424023&quot;  &quot;436910&quot;  &quot;451159&quot;  &quot;451642&quot;  &quot;455314&quot; 
-##  [99] &quot;474294&quot;  &quot;487521&quot;  &quot;491535&quot;  &quot;520125&quot;  &quot;520871&quot;  &quot;523607&quot;  &quot;526327&quot; 
-## [106] &quot;538273&quot;  &quot;538472&quot;  &quot;538559&quot;  &quot;548230&quot;  &quot;549892&quot;  &quot;552312&quot;  &quot;552831&quot; 
-## [113] &quot;554491&quot;  &quot;559655&quot;  &quot;579033&quot;  &quot;595269&quot;  &quot;627391&quot;  &quot;636441&quot;  &quot;639588&quot; 
-## [120] &quot;639637&quot;  &quot;645761&quot;  &quot;646542&quot;  &quot;665097&quot;  &quot;667588&quot;  &quot;678362&quot;  &quot;679649&quot; 
-## [127] &quot;688892&quot;  &quot;690426&quot;  &quot;697412&quot;  &quot;697664&quot;  &quot;704586&quot;  &quot;708949&quot;  &quot;712452&quot; 
-## [134] &quot;717355&quot;  &quot;720167&quot;  &quot;730821&quot;  &quot;731595&quot;  &quot;739454&quot;  &quot;740606&quot;  &quot;763350&quot; 
-## [141] &quot;764768&quot;  &quot;777053&quot;  &quot;779182&quot;  &quot;779405&quot;  &quot;787270&quot;  &quot;790437&quot;  &quot;797986&quot; 
-## [148] &quot;799846&quot;  &quot;800294&quot;  &quot;800394&quot;  &quot;804269&quot;  &quot;811439&quot;  &quot;813108&quot;  &quot;816831&quot; 
-## [155] &quot;823136&quot;  &quot;824252&quot;  &quot;826363&quot;  &quot;829327&quot;  &quot;838414&quot;  &quot;845663&quot;  &quot;851824&quot; 
-## [162] &quot;851888&quot;  &quot;853612&quot;  &quot;855985&quot;  &quot;860550&quot;  &quot;865151&quot;  &quot;873470&quot;  &quot;879105&quot; 
-## [169] &quot;880084&quot;  &quot;883546&quot;  &quot;885714&quot;  &quot;889691&quot;  &quot;890566&quot;  &quot;890593&quot;  &quot;900110&quot; 
-## [176] &quot;907235&quot;  &quot;910687&quot;  &quot;912123&quot;  &quot;912479&quot;  &quot;914842&quot;  &quot;915778&quot;  &quot;916379&quot; 
-## [183] &quot;922417&quot;  &quot;926914&quot;  &quot;938679&quot;  &quot;939928&quot;  &quot;940284&quot;  &quot;940959&quot;  &quot;942537&quot; 
-## [190] &quot;947007&quot;  &quot;950178&quot;  &quot;952679&quot;  &quot;953152&quot;  &quot;955498&quot;  &quot;956762&quot;  &quot;957417&quot; 
-## [197] &quot;958269&quot;  &quot;958316&quot;  &quot;964826&quot;  &quot;965204&quot;  &quot;966847&quot;  &quot;970900&quot;  &quot;971719&quot; 
-## [204] &quot;971892&quot;  &quot;984627&quot;  &quot;985545&quot;  &quot;989963&quot;  &quot;993290&quot;  &quot;996230&quot;  &quot;999819&quot; 
-## [211] &quot;1003157&quot; &quot;1012289&quot; &quot;1012301&quot; &quot;1017161&quot; &quot;1020421&quot; &quot;1021288&quot; &quot;1021913&quot;
-## [218] &quot;1025977&quot; &quot;1030283&quot; &quot;1038623&quot; &quot;1041940&quot; &quot;1042819&quot; &quot;1042833&quot; &quot;1043812&quot;
-## [225] &quot;1044135&quot; &quot;1048305&quot; &quot;1051840&quot; &quot;1051927&quot; &quot;1052555&quot; &quot;1059865&quot; &quot;1061879&quot;
-## [232] &quot;1061960&quot; &quot;1063365&quot; &quot;1065343&quot; &quot;1067716&quot; &quot;1068215&quot; &quot;1068457&quot; &quot;1075212&quot;
-## [239] &quot;1075382&quot; &quot;1088759&quot; &quot;1092479&quot; &quot;1099385&quot; &quot;1104959&quot; &quot;1111524&quot; &quot;1122088&quot;
-## [246] &quot;1122380&quot; &quot;1125162&quot; &quot;1129842&quot; &quot;1131207&quot; &quot;1133276&quot; &quot;1135407&quot; &quot;1136035&quot;
-## [253] &quot;1136367&quot; &quot;1136530&quot; &quot;1138647&quot; &quot;1140391&quot; &quot;1145219&quot; &quot;1149844&quot; &quot;1150667&quot;
-## [260] &quot;1157752&quot; &quot;1165808&quot; &quot;1170659&quot; &quot;1172510&quot; &quot;1176459&quot; &quot;1180813&quot; &quot;1188375&quot;
-## [267] &quot;1196151&quot; &quot;1197372&quot; &quot;1197915&quot; &quot;1205543&quot; &quot;1213106&quot; &quot;1218608&quot; &quot;1218801&quot;
-## [274] &quot;1219767&quot; &quot;1223318&quot; &quot;1226643&quot; &quot;1226886&quot; &quot;1227154&quot; &quot;1227525&quot; &quot;1239819&quot;
-## [281] &quot;1239821&quot; &quot;1239912&quot; &quot;1240152&quot; &quot;1240351&quot; &quot;1296047&quot; &quot;1298904&quot; &quot;1299226&quot;
-## [288] &quot;1300677&quot; &quot;1303945&quot; &quot;1304996&quot; &quot;1306051&quot; &quot;1306336&quot; &quot;1306834&quot; &quot;1307836&quot;
-## [295] &quot;1308570&quot; &quot;1310290&quot; &quot;1310320&quot; &quot;1310355&quot; &quot;1311954&quot; &quot;1312138&quot; &quot;1313710&quot;
-## [302] &quot;1314450&quot; &quot;1316822&quot; &quot;1317101&quot; &quot;1318058&quot; &quot;1318628&quot; &quot;1318958&quot; &quot;1319240&quot;
-## [309] &quot;1319347&quot; &quot;1319972&quot; &quot;1321184&quot; &quot;1322140&quot; &quot;1324517&quot; &quot;1326528&quot; &quot;1327762&quot;
-## [316] &quot;1328054&quot; &quot;1328384&quot; &quot;1331061&quot; &quot;1331124&quot; &quot;1339849&quot; &quot;3000244&quot; &quot;3000335&quot;
-## [323] &quot;3000343&quot; &quot;3000345&quot; &quot;3000352&quot; &quot;3000414&quot; &quot;3000466&quot; &quot;3000469&quot; &quot;3000493&quot;
-## [330] &quot;3000495&quot; &quot;3000499&quot; &quot;3000501&quot; &quot;3000549&quot; &quot;3000553&quot; &quot;3000561&quot; &quot;3000579&quot;
-## [337] &quot;3000589&quot; &quot;3000598&quot; &quot;3000610&quot; &quot;3000615&quot; &quot;3000683&quot; &quot;3000696&quot; &quot;3000707&quot;
-## [344] &quot;3000714&quot; &quot;3000722&quot; &quot;3000748&quot; &quot;3000756&quot; &quot;3000771&quot; &quot;3000775&quot; &quot;3000782&quot;
-## [351] &quot;3000809&quot; &quot;3000813&quot; &quot;3000841&quot; &quot;3000889&quot; &quot;3000916&quot; &quot;3000982&quot; &quot;3001026&quot;
-## [358] &quot;3001047&quot; &quot;3001051&quot; &quot;3001060&quot; &quot;3001065&quot; &quot;3001090&quot; &quot;3001146&quot; &quot;3001165&quot;
-## [365] &quot;3001279&quot; &quot;3001313&quot; &quot;3001315&quot; &quot;3001437&quot; &quot;3001585&quot; &quot;3001590&quot; &quot;3001592&quot;
-## [372] &quot;3001825&quot; &quot;3001827&quot;</code></pre>
+<pre><code>##   [1]    3428    4289   13146   14949   22764   23830   24420   37073   47162
+##  [10]   53174   56379   58697   66144   67418   69591   70750   73422   73632
+##  [19]   76269   78985   83654   87058   87421   94410   95776  109663  122304
+##  [28]  124303  124996  129685  131137  137595  138426  139439  140997  141274
+##  [37]  141319  144091  144675  145791  147060  147520  148344  148716  152206
+##  [46]  153049  166094  172062  175460  177114  179073  224710  230141  232210
+##  [55]  232606  234521  236141  238448  239186  241515  242124  242567  250757
+##  [64]  257753  263497  274098  274741  279363  285394  293486  296422  300098
+##  [73]  300936  302951  305914  310970  315987  322767  323131  330111  333796
+##  [82]  336038  356069  367770  369511  374937  376872  377136  379078  411254
+##  [91]  416545  417411  418981  424023  436910  451159  451642  455314  474294
+## [100]  487521  491535  520125  520871  523607  526327  538273  538472  538559
+## [109]  548230  549892  552312  552831  554491  559655  579033  595269  627391
+## [118]  636441  639588  639637  645761  646542  665097  667588  678362  679649
+## [127]  688892  690426  697412  697664  704586  708949  712452  717355  720167
+## [136]  730821  731595  739454  740606  763350  764768  777053  779182  779405
+## [145]  787270  790437  797986  799846  800294  800394  804269  811439  813108
+## [154]  816831  823136  824252  826363  829327  838414  845663  851824  851888
+## [163]  853612  855985  860550  865151  873470  879105  880084  883546  885714
+## [172]  889691  890566  890593  900110  907235  910687  912123  912479  914842
+## [181]  915778  916379  922417  926914  938679  939928  940284  940959  942537
+## [190]  947007  950178  952679  953152  955498  956762  957417  958269  958316
+## [199]  964826  965204  966847  970900  971719  971892  984627  985545  989963
+## [208]  993290  996230  999819 1003157 1012289 1012301 1017161 1020421 1021288
+## [217] 1021913 1025977 1030283 1038623 1041940 1042819 1042833 1043812 1044135
+## [226] 1048305 1051840 1051927 1052555 1059865 1061879 1061960 1063365 1065343
+## [235] 1067716 1068215 1068457 1075212 1075382 1088759 1092479 1099385 1104959
+## [244] 1111524 1122088 1122380 1125162 1129842 1131207 1133276 1135407 1136035
+## [253] 1136367 1136530 1138647 1140391 1145219 1149844 1150667 1157752 1165808
+## [262] 1170659 1172510 1176459 1180813 1188375 1196151 1197372 1197915 1205543
+## [271] 1213106 1218608 1218801 1219767 1223318 1226643 1226886 1227154 1227525
+## [280] 1239819 1239821 1239912 1240152 1240351 1296047 1298904 1299226 1300677
+## [289] 1303945 1304996 1306051 1306336 1306834 1307836 1308570 1310290 1310320
+## [298] 1310355 1311954 1312138 1313710 1314450 1316822 1317101 1318058 1318628
+## [307] 1318958 1319240 1319347 1319972 1321184 1322140 1324517 1326528 1327762
+## [316] 1328054 1328384 1331061 1331124 1339849 3000244 3000335 3000343 3000345
+## [325] 3000352 3000414 3000466 3000469 3000493 3000495 3000499 3000501 3000549
+## [334] 3000553 3000561 3000579 3000589 3000598 3000610 3000615 3000683 3000696
+## [343] 3000707 3000714 3000722 3000748 3000756 3000771 3000775 3000782 3000809
+## [352] 3000813 3000841 3000889 3000916 3000982 3001026 3001047 3001051 3001060
+## [361] 3001065 3001090 3001146 3001165 3001279 3001313 3001315 3001437 3001585
+## [370] 3001590 3001592 3001825 3001827</code></pre>
 <p>These households don’t have trips recorded. Here’s a couple of cases (randomly chosen)</p>
 <pre class="r"><code>trips[trips$ID_HOGAR == &quot;3001827&quot;,]</code></pre>
 <pre><code>## # A tibble: 0 x 43
-## # ... with 43 variables: ID_HOGAR &lt;chr&gt;, ID_MORADOR &lt;chr&gt;, SEC_VIAJE &lt;chr&gt;,
+## # ... with 43 variables: ID_HOGAR &lt;dbl&gt;, ID_MORADOR &lt;dbl&gt;, SEC_VIAJE &lt;dbl&gt;,
 ## #   ID_MUNICIPIO_O &lt;chr&gt;, MUNICIPIO_O &lt;chr&gt;, ID_COMUNA_O &lt;chr&gt;, COMUNA_O &lt;chr&gt;,
-## #   ID_BARRIO_O &lt;chr&gt;, BARRIO_O &lt;chr&gt;, SIT_O &lt;chr&gt;, HORA_O &lt;chr&gt;,
+## #   ID_BARRIO_O &lt;chr&gt;, BARRIO_O &lt;lgl&gt;, SIT_O &lt;chr&gt;, HORA_O &lt;dttm&gt;,
 ## #   ID_MUNICIPIO_D &lt;chr&gt;, MUNICIPIO_D &lt;chr&gt;, ID_COMUNA_D &lt;chr&gt;, COMUNA_D &lt;chr&gt;,
-## #   ID_BARRIO_D &lt;chr&gt;, BARRIO_D2 &lt;chr&gt;, SIT_D &lt;chr&gt;, HORA_D &lt;chr&gt;,
-## #   MOTIVO_VIAJE &lt;chr&gt;, DESC_MOTIVO_VIAJE &lt;chr&gt;, MODO_TTE_E1 &lt;chr&gt;,
-## #   DESC_MODO_TTE_E1 &lt;chr&gt;, MODO_TTE_E2 &lt;chr&gt;, DESC_MODO_TTE_E2 &lt;chr&gt;,
-## #   MODO_TTE_E3 &lt;chr&gt;, DESC_MODO_TTE_E3 &lt;chr&gt;, MODO_TTE_E4 &lt;chr&gt;,
-## #   DESC_MODO_TTE_E4 &lt;chr&gt;, MODO_TTE_E5 &lt;chr&gt;, DEC_MODO_TTE_E5 &lt;chr&gt;,
-## #   MODO_TTE_E6 &lt;chr&gt;, DESC_MODO_TTE_E6 &lt;chr&gt;, MODO_TTE_E7 &lt;chr&gt;,
-## #   DESC_MODO_TTE_E7 &lt;chr&gt;, FREC_CANTIDAD &lt;chr&gt;, ID_FREC_VIAJE &lt;chr&gt;,
-## #   DESC_ID_FREC_VIAJE &lt;chr&gt;, COSTO_TTE_PARQ &lt;chr&gt;,
+## #   ID_BARRIO_D &lt;chr&gt;, BARRIO_D2 &lt;lgl&gt;, SIT_D &lt;chr&gt;, HORA_D &lt;dttm&gt;,
+## #   MOTIVO_VIAJE &lt;chr&gt;, DESC_MOTIVO_VIAJE &lt;chr&gt;, MODO_TTE_E1 &lt;dbl&gt;,
+## #   DESC_MODO_TTE_E1 &lt;chr&gt;, MODO_TTE_E2 &lt;dbl&gt;, DESC_MODO_TTE_E2 &lt;chr&gt;,
+## #   MODO_TTE_E3 &lt;dbl&gt;, DESC_MODO_TTE_E3 &lt;chr&gt;, MODO_TTE_E4 &lt;dbl&gt;,
+## #   DESC_MODO_TTE_E4 &lt;chr&gt;, MODO_TTE_E5 &lt;dbl&gt;, DEC_MODO_TTE_E5 &lt;chr&gt;,
+## #   MODO_TTE_E6 &lt;dbl&gt;, DESC_MODO_TTE_E6 &lt;chr&gt;, MODO_TTE_E7 &lt;dbl&gt;,
+## #   DESC_MODO_TTE_E7 &lt;chr&gt;, FREC_CANTIDAD &lt;dbl&gt;, ID_FREC_VIAJE &lt;chr&gt;,
+## #   DESC_ID_FREC_VIAJE &lt;chr&gt;, COSTO_TTE_PARQ &lt;dbl&gt;,
 ## #   FORMA_PAGO_PARQUEADERO &lt;chr&gt;, DESC_FORMA_PAGO_PARQUEADERO &lt;chr&gt;,
 ## #   TIPO_PARQUEO &lt;chr&gt;, DESC_TIPO_PARQUEO &lt;chr&gt;</code></pre>
 <pre class="r"><code>trips[trips$ID_HOGAR == &quot;305914&quot;,]</code></pre>
 <pre><code>## # A tibble: 0 x 43
-## # ... with 43 variables: ID_HOGAR &lt;chr&gt;, ID_MORADOR &lt;chr&gt;, SEC_VIAJE &lt;chr&gt;,
+## # ... with 43 variables: ID_HOGAR &lt;dbl&gt;, ID_MORADOR &lt;dbl&gt;, SEC_VIAJE &lt;dbl&gt;,
 ## #   ID_MUNICIPIO_O &lt;chr&gt;, MUNICIPIO_O &lt;chr&gt;, ID_COMUNA_O &lt;chr&gt;, COMUNA_O &lt;chr&gt;,
-## #   ID_BARRIO_O &lt;chr&gt;, BARRIO_O &lt;chr&gt;, SIT_O &lt;chr&gt;, HORA_O &lt;chr&gt;,
+## #   ID_BARRIO_O &lt;chr&gt;, BARRIO_O &lt;lgl&gt;, SIT_O &lt;chr&gt;, HORA_O &lt;dttm&gt;,
 ## #   ID_MUNICIPIO_D &lt;chr&gt;, MUNICIPIO_D &lt;chr&gt;, ID_COMUNA_D &lt;chr&gt;, COMUNA_D &lt;chr&gt;,
-## #   ID_BARRIO_D &lt;chr&gt;, BARRIO_D2 &lt;chr&gt;, SIT_D &lt;chr&gt;, HORA_D &lt;chr&gt;,
-## #   MOTIVO_VIAJE &lt;chr&gt;, DESC_MOTIVO_VIAJE &lt;chr&gt;, MODO_TTE_E1 &lt;chr&gt;,
-## #   DESC_MODO_TTE_E1 &lt;chr&gt;, MODO_TTE_E2 &lt;chr&gt;, DESC_MODO_TTE_E2 &lt;chr&gt;,
-## #   MODO_TTE_E3 &lt;chr&gt;, DESC_MODO_TTE_E3 &lt;chr&gt;, MODO_TTE_E4 &lt;chr&gt;,
-## #   DESC_MODO_TTE_E4 &lt;chr&gt;, MODO_TTE_E5 &lt;chr&gt;, DEC_MODO_TTE_E5 &lt;chr&gt;,
-## #   MODO_TTE_E6 &lt;chr&gt;, DESC_MODO_TTE_E6 &lt;chr&gt;, MODO_TTE_E7 &lt;chr&gt;,
-## #   DESC_MODO_TTE_E7 &lt;chr&gt;, FREC_CANTIDAD &lt;chr&gt;, ID_FREC_VIAJE &lt;chr&gt;,
-## #   DESC_ID_FREC_VIAJE &lt;chr&gt;, COSTO_TTE_PARQ &lt;chr&gt;,
+## #   ID_BARRIO_D &lt;chr&gt;, BARRIO_D2 &lt;lgl&gt;, SIT_D &lt;chr&gt;, HORA_D &lt;dttm&gt;,
+## #   MOTIVO_VIAJE &lt;chr&gt;, DESC_MOTIVO_VIAJE &lt;chr&gt;, MODO_TTE_E1 &lt;dbl&gt;,
+## #   DESC_MODO_TTE_E1 &lt;chr&gt;, MODO_TTE_E2 &lt;dbl&gt;, DESC_MODO_TTE_E2 &lt;chr&gt;,
+## #   MODO_TTE_E3 &lt;dbl&gt;, DESC_MODO_TTE_E3 &lt;chr&gt;, MODO_TTE_E4 &lt;dbl&gt;,
+## #   DESC_MODO_TTE_E4 &lt;chr&gt;, MODO_TTE_E5 &lt;dbl&gt;, DEC_MODO_TTE_E5 &lt;chr&gt;,
+## #   MODO_TTE_E6 &lt;dbl&gt;, DESC_MODO_TTE_E6 &lt;chr&gt;, MODO_TTE_E7 &lt;dbl&gt;,
+## #   DESC_MODO_TTE_E7 &lt;chr&gt;, FREC_CANTIDAD &lt;dbl&gt;, ID_FREC_VIAJE &lt;chr&gt;,
+## #   DESC_ID_FREC_VIAJE &lt;chr&gt;, COSTO_TTE_PARQ &lt;dbl&gt;,
 ## #   FORMA_PAGO_PARQUEADERO &lt;chr&gt;, DESC_FORMA_PAGO_PARQUEADERO &lt;chr&gt;,
 ## #   TIPO_PARQUEO &lt;chr&gt;, DESC_TIPO_PARQUEO &lt;chr&gt;</code></pre>
 <p>Since there are hh without trips, I want to see whether there are trips without hh information. The following output suggest that it’s not the case.</p>
 <pre class="r"><code>trips$ID_HOGAR[!trips$ID_HOGAR %in% c(hh$ID_HOGAR)]</code></pre>
-<pre><code>## character(0)</code></pre>
+<pre><code>## numeric(0)</code></pre>
 </div>
 <div id="number-of-people-in-trip-dataset" class="section level3">
 <h3>Number of people in trip dataset</h3>
@@ -1972,34 +1960,34 @@ length(unique(trips$participant_id_paste)) == nrow(people)</code></pre>
 <p>These people don’t have trips recorded, and it must be because of restrictions in the questionnaire. Here’s a couple of cases (randomly chosen)</p>
 <pre class="r"><code>trips[trips$participant_id_paste == &quot;102776-257&quot;,]</code></pre>
 <pre><code>## # A tibble: 0 x 44
-## # ... with 44 variables: ID_HOGAR &lt;chr&gt;, ID_MORADOR &lt;chr&gt;, SEC_VIAJE &lt;chr&gt;,
+## # ... with 44 variables: ID_HOGAR &lt;dbl&gt;, ID_MORADOR &lt;dbl&gt;, SEC_VIAJE &lt;dbl&gt;,
 ## #   ID_MUNICIPIO_O &lt;chr&gt;, MUNICIPIO_O &lt;chr&gt;, ID_COMUNA_O &lt;chr&gt;, COMUNA_O &lt;chr&gt;,
-## #   ID_BARRIO_O &lt;chr&gt;, BARRIO_O &lt;chr&gt;, SIT_O &lt;chr&gt;, HORA_O &lt;chr&gt;,
+## #   ID_BARRIO_O &lt;chr&gt;, BARRIO_O &lt;lgl&gt;, SIT_O &lt;chr&gt;, HORA_O &lt;dttm&gt;,
 ## #   ID_MUNICIPIO_D &lt;chr&gt;, MUNICIPIO_D &lt;chr&gt;, ID_COMUNA_D &lt;chr&gt;, COMUNA_D &lt;chr&gt;,
-## #   ID_BARRIO_D &lt;chr&gt;, BARRIO_D2 &lt;chr&gt;, SIT_D &lt;chr&gt;, HORA_D &lt;chr&gt;,
-## #   MOTIVO_VIAJE &lt;chr&gt;, DESC_MOTIVO_VIAJE &lt;chr&gt;, MODO_TTE_E1 &lt;chr&gt;,
-## #   DESC_MODO_TTE_E1 &lt;chr&gt;, MODO_TTE_E2 &lt;chr&gt;, DESC_MODO_TTE_E2 &lt;chr&gt;,
-## #   MODO_TTE_E3 &lt;chr&gt;, DESC_MODO_TTE_E3 &lt;chr&gt;, MODO_TTE_E4 &lt;chr&gt;,
-## #   DESC_MODO_TTE_E4 &lt;chr&gt;, MODO_TTE_E5 &lt;chr&gt;, DEC_MODO_TTE_E5 &lt;chr&gt;,
-## #   MODO_TTE_E6 &lt;chr&gt;, DESC_MODO_TTE_E6 &lt;chr&gt;, MODO_TTE_E7 &lt;chr&gt;,
-## #   DESC_MODO_TTE_E7 &lt;chr&gt;, FREC_CANTIDAD &lt;chr&gt;, ID_FREC_VIAJE &lt;chr&gt;,
-## #   DESC_ID_FREC_VIAJE &lt;chr&gt;, COSTO_TTE_PARQ &lt;chr&gt;,
+## #   ID_BARRIO_D &lt;chr&gt;, BARRIO_D2 &lt;lgl&gt;, SIT_D &lt;chr&gt;, HORA_D &lt;dttm&gt;,
+## #   MOTIVO_VIAJE &lt;chr&gt;, DESC_MOTIVO_VIAJE &lt;chr&gt;, MODO_TTE_E1 &lt;dbl&gt;,
+## #   DESC_MODO_TTE_E1 &lt;chr&gt;, MODO_TTE_E2 &lt;dbl&gt;, DESC_MODO_TTE_E2 &lt;chr&gt;,
+## #   MODO_TTE_E3 &lt;dbl&gt;, DESC_MODO_TTE_E3 &lt;chr&gt;, MODO_TTE_E4 &lt;dbl&gt;,
+## #   DESC_MODO_TTE_E4 &lt;chr&gt;, MODO_TTE_E5 &lt;dbl&gt;, DEC_MODO_TTE_E5 &lt;chr&gt;,
+## #   MODO_TTE_E6 &lt;dbl&gt;, DESC_MODO_TTE_E6 &lt;chr&gt;, MODO_TTE_E7 &lt;dbl&gt;,
+## #   DESC_MODO_TTE_E7 &lt;chr&gt;, FREC_CANTIDAD &lt;dbl&gt;, ID_FREC_VIAJE &lt;chr&gt;,
+## #   DESC_ID_FREC_VIAJE &lt;chr&gt;, COSTO_TTE_PARQ &lt;dbl&gt;,
 ## #   FORMA_PAGO_PARQUEADERO &lt;chr&gt;, DESC_FORMA_PAGO_PARQUEADERO &lt;chr&gt;,
 ## #   TIPO_PARQUEO &lt;chr&gt;, DESC_TIPO_PARQUEO &lt;chr&gt;, participant_id_paste &lt;chr&gt;</code></pre>
 <pre class="r"><code>trips[trips$participant_id_paste == &quot;80621-35&quot;,]</code></pre>
 <pre><code>## # A tibble: 0 x 44
-## # ... with 44 variables: ID_HOGAR &lt;chr&gt;, ID_MORADOR &lt;chr&gt;, SEC_VIAJE &lt;chr&gt;,
+## # ... with 44 variables: ID_HOGAR &lt;dbl&gt;, ID_MORADOR &lt;dbl&gt;, SEC_VIAJE &lt;dbl&gt;,
 ## #   ID_MUNICIPIO_O &lt;chr&gt;, MUNICIPIO_O &lt;chr&gt;, ID_COMUNA_O &lt;chr&gt;, COMUNA_O &lt;chr&gt;,
-## #   ID_BARRIO_O &lt;chr&gt;, BARRIO_O &lt;chr&gt;, SIT_O &lt;chr&gt;, HORA_O &lt;chr&gt;,
+## #   ID_BARRIO_O &lt;chr&gt;, BARRIO_O &lt;lgl&gt;, SIT_O &lt;chr&gt;, HORA_O &lt;dttm&gt;,
 ## #   ID_MUNICIPIO_D &lt;chr&gt;, MUNICIPIO_D &lt;chr&gt;, ID_COMUNA_D &lt;chr&gt;, COMUNA_D &lt;chr&gt;,
-## #   ID_BARRIO_D &lt;chr&gt;, BARRIO_D2 &lt;chr&gt;, SIT_D &lt;chr&gt;, HORA_D &lt;chr&gt;,
-## #   MOTIVO_VIAJE &lt;chr&gt;, DESC_MOTIVO_VIAJE &lt;chr&gt;, MODO_TTE_E1 &lt;chr&gt;,
-## #   DESC_MODO_TTE_E1 &lt;chr&gt;, MODO_TTE_E2 &lt;chr&gt;, DESC_MODO_TTE_E2 &lt;chr&gt;,
-## #   MODO_TTE_E3 &lt;chr&gt;, DESC_MODO_TTE_E3 &lt;chr&gt;, MODO_TTE_E4 &lt;chr&gt;,
-## #   DESC_MODO_TTE_E4 &lt;chr&gt;, MODO_TTE_E5 &lt;chr&gt;, DEC_MODO_TTE_E5 &lt;chr&gt;,
-## #   MODO_TTE_E6 &lt;chr&gt;, DESC_MODO_TTE_E6 &lt;chr&gt;, MODO_TTE_E7 &lt;chr&gt;,
-## #   DESC_MODO_TTE_E7 &lt;chr&gt;, FREC_CANTIDAD &lt;chr&gt;, ID_FREC_VIAJE &lt;chr&gt;,
-## #   DESC_ID_FREC_VIAJE &lt;chr&gt;, COSTO_TTE_PARQ &lt;chr&gt;,
+## #   ID_BARRIO_D &lt;chr&gt;, BARRIO_D2 &lt;lgl&gt;, SIT_D &lt;chr&gt;, HORA_D &lt;dttm&gt;,
+## #   MOTIVO_VIAJE &lt;chr&gt;, DESC_MOTIVO_VIAJE &lt;chr&gt;, MODO_TTE_E1 &lt;dbl&gt;,
+## #   DESC_MODO_TTE_E1 &lt;chr&gt;, MODO_TTE_E2 &lt;dbl&gt;, DESC_MODO_TTE_E2 &lt;chr&gt;,
+## #   MODO_TTE_E3 &lt;dbl&gt;, DESC_MODO_TTE_E3 &lt;chr&gt;, MODO_TTE_E4 &lt;dbl&gt;,
+## #   DESC_MODO_TTE_E4 &lt;chr&gt;, MODO_TTE_E5 &lt;dbl&gt;, DEC_MODO_TTE_E5 &lt;chr&gt;,
+## #   MODO_TTE_E6 &lt;dbl&gt;, DESC_MODO_TTE_E6 &lt;chr&gt;, MODO_TTE_E7 &lt;dbl&gt;,
+## #   DESC_MODO_TTE_E7 &lt;chr&gt;, FREC_CANTIDAD &lt;dbl&gt;, ID_FREC_VIAJE &lt;chr&gt;,
+## #   DESC_ID_FREC_VIAJE &lt;chr&gt;, COSTO_TTE_PARQ &lt;dbl&gt;,
 ## #   FORMA_PAGO_PARQUEADERO &lt;chr&gt;, DESC_FORMA_PAGO_PARQUEADERO &lt;chr&gt;,
 ## #   TIPO_PARQUEO &lt;chr&gt;, DESC_TIPO_PARQUEO &lt;chr&gt;, participant_id_paste &lt;chr&gt;</code></pre>
 <p>Since there are people without trips, I want to see whether there are trips without people information. The following output suggest there is one trip without personal information, and when looking for it in the people dataset it doesn’t appear. Therefore, these trips are going to be removed (later).</p>
@@ -2007,22 +1995,22 @@ length(unique(trips$participant_id_paste)) == nrow(people)</code></pre>
 <pre><code>## [1] &quot;401022-158&quot; &quot;401022-158&quot; &quot;401022-158&quot; &quot;401022-158&quot;</code></pre>
 <pre class="r"><code>people[people$ID_HOGAR == &quot;401022&quot; &amp; people$ORDEN_MORADOR == &quot;158&quot;,]</code></pre>
 <pre><code>## # A tibble: 0 x 84
-## # ... with 84 variables: ID_HOGAR &lt;chr&gt;, ORDEN_MORADOR &lt;chr&gt;,
-## #   MORADOR_PRESENTE &lt;chr&gt;, PARENTESCO &lt;chr&gt;, DESC_PARENTESCO &lt;chr&gt;,
-## #   EDAD &lt;chr&gt;, GENERO &lt;chr&gt;, ESCOLARIDAD_MAX &lt;chr&gt;,
+## # ... with 84 variables: ID_HOGAR &lt;dbl&gt;, ORDEN_MORADOR &lt;dbl&gt;,
+## #   MORADOR_PRESENTE &lt;lgl&gt;, PARENTESCO &lt;chr&gt;, DESC_PARENTESCO &lt;chr&gt;,
+## #   EDAD &lt;dbl&gt;, GENERO &lt;chr&gt;, ESCOLARIDAD_MAX &lt;chr&gt;,
 ## #   DESC_ESCOLARIDAD_MAX &lt;chr&gt;, OCUPACION &lt;chr&gt;, DESC_OCUPACION &lt;chr&gt;,
 ## #   DEDICACION_LABORAL &lt;chr&gt;, DESC_DEDICACION_LABORAL &lt;chr&gt;,
 ## #   SECTOR_LABORAL &lt;chr&gt;, DESC_SECTOR_LABORAL &lt;chr&gt;, NIVEL_LABORAL &lt;chr&gt;,
 ## #   DESC_NIVEL_LABORAL &lt;chr&gt;, LUGAR_LABORA &lt;chr&gt;, DESC_LUGAR_LABORA &lt;chr&gt;,
-## #   HORAS_LABORA_CASA &lt;chr&gt;, HORAS_LABORA_OFICINA &lt;chr&gt;,
-## #   HORA_OFICIAL_INICIO_LABORAL &lt;chr&gt;, DISCAPACIDAD &lt;chr&gt;,
+## #   HORAS_LABORA_CASA &lt;dbl&gt;, HORAS_LABORA_OFICINA &lt;dbl&gt;,
+## #   HORA_OFICIAL_INICIO_LABORAL &lt;dttm&gt;, DISCAPACIDAD &lt;chr&gt;,
 ## #   DESC_DISCAPACIDAD &lt;chr&gt;, DISCAPACIDAD_ES &lt;chr&gt;, DESC_DISCAPACIDAD_ES &lt;chr&gt;,
 ## #   REQUIERE_AYUDA &lt;chr&gt;, DESC_REQUIERE_AYUDA &lt;chr&gt;,
 ## #   DIFICULTAD_ACCESO_OPCION2 &lt;chr&gt;, DESC_DIFICULTAD_ACCESO_OPCION2 &lt;chr&gt;,
 ## #   DIFICULTAD_ACCESO_OPCION3 &lt;chr&gt;, DESC_DIFICULTAD_ACCESO_OPCION3 &lt;chr&gt;,
 ## #   DIFICULTAD_ACCESO_OPCION4 &lt;chr&gt;, DESC_DIFICULTAD_ACCESO_OPCION4 &lt;chr&gt;,
-## #   DIFICULTAD_ACCESO_OPCION5 &lt;chr&gt;, DESC_DIFICULTAD_ACCESO_OPCION5 &lt;chr&gt;,
-## #   DIFICULTAD_ACCESO_OPCION6 &lt;chr&gt;, DESC_DIFICULTAD_ACCESO_OPCION6 &lt;chr&gt;,
+## #   DIFICULTAD_ACCESO_OPCION5 &lt;lgl&gt;, DESC_DIFICULTAD_ACCESO_OPCION5 &lt;lgl&gt;,
+## #   DIFICULTAD_ACCESO_OPCION6 &lt;lgl&gt;, DESC_DIFICULTAD_ACCESO_OPCION6 &lt;lgl&gt;,
 ## #   REALIZO_VIAJES &lt;chr&gt;, DESC_REALIZO_VIAJES &lt;chr&gt;, RAZON_NO_VIAJO &lt;chr&gt;,
 ## #   DESC_RAZON_NO_VIAJO &lt;chr&gt;, MODO_USA_PORPyP_AM &lt;chr&gt;,
 ## #   DESC_MODO_USA_PORPyP_AM &lt;chr&gt;, MODO_USA_PORPyP_PM &lt;chr&gt;,
@@ -2042,26 +2030,26 @@ length(unique(trips$participant_id_paste)) == nrow(people)</code></pre>
 ## #   DESC_TIPO_DOMICILIO &lt;chr&gt;, DOMICILIO_INTERNET &lt;chr&gt;,
 ## #   DESC_DOMICILIO_INTERNET &lt;chr&gt;, VEH_DOMICILIO &lt;chr&gt;,
 ## #   DESC_VEH_DOMICILIO &lt;chr&gt;, TIPO_SERVICIO &lt;chr&gt;, DESC_TIPO_SERVICIO &lt;chr&gt;,
-## #   TIEMPO_SERVICIO &lt;chr&gt;, VEH_SERVICIO &lt;chr&gt;, DESC_VEH_SERVICIO &lt;chr&gt;,
+## #   TIEMPO_SERVICIO &lt;dbl&gt;, VEH_SERVICIO &lt;chr&gt;, DESC_VEH_SERVICIO &lt;chr&gt;,
 ## #   INGRESO_HOGAR &lt;chr&gt;, DESC_INGRESO_HOGAR &lt;chr&gt;, participant_id_paste &lt;chr&gt;</code></pre>
 <pre class="r"><code>trips[trips$participant_id_paste == &quot;401022-158&quot;,]</code></pre>
 <pre><code>## # A tibble: 4 x 44
 ##   ID_HOGAR ID_MORADOR SEC_VIAJE ID_MUNICIPIO_O MUNICIPIO_O ID_COMUNA_O COMUNA_O
-##   &lt;chr&gt;    &lt;chr&gt;      &lt;chr&gt;     &lt;chr&gt;          &lt;chr&gt;       &lt;chr&gt;       &lt;chr&gt;   
-## 1 401022   158        570       001            Medellin    15          Buenos ~
-## 2 401022   158        571       001            Medellin    11          Robledo 
-## 3 401022   158        572       001            Medellin    11          Robledo 
-## 4 401022   158        573       001            Medellin    11          Robledo 
-## # ... with 37 more variables: ID_BARRIO_O &lt;chr&gt;, BARRIO_O &lt;chr&gt;, SIT_O &lt;chr&gt;,
-## #   HORA_O &lt;chr&gt;, ID_MUNICIPIO_D &lt;chr&gt;, MUNICIPIO_D &lt;chr&gt;, ID_COMUNA_D &lt;chr&gt;,
-## #   COMUNA_D &lt;chr&gt;, ID_BARRIO_D &lt;chr&gt;, BARRIO_D2 &lt;chr&gt;, SIT_D &lt;chr&gt;,
-## #   HORA_D &lt;chr&gt;, MOTIVO_VIAJE &lt;chr&gt;, DESC_MOTIVO_VIAJE &lt;chr&gt;,
-## #   MODO_TTE_E1 &lt;chr&gt;, DESC_MODO_TTE_E1 &lt;chr&gt;, MODO_TTE_E2 &lt;chr&gt;,
-## #   DESC_MODO_TTE_E2 &lt;chr&gt;, MODO_TTE_E3 &lt;chr&gt;, DESC_MODO_TTE_E3 &lt;chr&gt;,
-## #   MODO_TTE_E4 &lt;chr&gt;, DESC_MODO_TTE_E4 &lt;chr&gt;, MODO_TTE_E5 &lt;chr&gt;,
-## #   DEC_MODO_TTE_E5 &lt;chr&gt;, MODO_TTE_E6 &lt;chr&gt;, DESC_MODO_TTE_E6 &lt;chr&gt;,
-## #   MODO_TTE_E7 &lt;chr&gt;, DESC_MODO_TTE_E7 &lt;chr&gt;, FREC_CANTIDAD &lt;chr&gt;,
-## #   ID_FREC_VIAJE &lt;chr&gt;, DESC_ID_FREC_VIAJE &lt;chr&gt;, COSTO_TTE_PARQ &lt;chr&gt;,
+##      &lt;dbl&gt;      &lt;dbl&gt;     &lt;dbl&gt; &lt;chr&gt;          &lt;chr&gt;       &lt;chr&gt;       &lt;chr&gt;   
+## 1   401022        158       570 001            Medellin    15          Buenos ~
+## 2   401022        158       571 001            Medellin    11          Robledo 
+## 3   401022        158       572 001            Medellin    11          Robledo 
+## 4   401022        158       573 001            Medellin    11          Robledo 
+## # ... with 37 more variables: ID_BARRIO_O &lt;chr&gt;, BARRIO_O &lt;lgl&gt;, SIT_O &lt;chr&gt;,
+## #   HORA_O &lt;dttm&gt;, ID_MUNICIPIO_D &lt;chr&gt;, MUNICIPIO_D &lt;chr&gt;, ID_COMUNA_D &lt;chr&gt;,
+## #   COMUNA_D &lt;chr&gt;, ID_BARRIO_D &lt;chr&gt;, BARRIO_D2 &lt;lgl&gt;, SIT_D &lt;chr&gt;,
+## #   HORA_D &lt;dttm&gt;, MOTIVO_VIAJE &lt;chr&gt;, DESC_MOTIVO_VIAJE &lt;chr&gt;,
+## #   MODO_TTE_E1 &lt;dbl&gt;, DESC_MODO_TTE_E1 &lt;chr&gt;, MODO_TTE_E2 &lt;dbl&gt;,
+## #   DESC_MODO_TTE_E2 &lt;chr&gt;, MODO_TTE_E3 &lt;dbl&gt;, DESC_MODO_TTE_E3 &lt;chr&gt;,
+## #   MODO_TTE_E4 &lt;dbl&gt;, DESC_MODO_TTE_E4 &lt;chr&gt;, MODO_TTE_E5 &lt;dbl&gt;,
+## #   DEC_MODO_TTE_E5 &lt;chr&gt;, MODO_TTE_E6 &lt;dbl&gt;, DESC_MODO_TTE_E6 &lt;chr&gt;,
+## #   MODO_TTE_E7 &lt;dbl&gt;, DESC_MODO_TTE_E7 &lt;chr&gt;, FREC_CANTIDAD &lt;dbl&gt;,
+## #   ID_FREC_VIAJE &lt;chr&gt;, DESC_ID_FREC_VIAJE &lt;chr&gt;, COSTO_TTE_PARQ &lt;dbl&gt;,
 ## #   FORMA_PAGO_PARQUEADERO &lt;chr&gt;, DESC_FORMA_PAGO_PARQUEADERO &lt;chr&gt;,
 ## #   TIPO_PARQUEO &lt;chr&gt;, DESC_TIPO_PARQUEO &lt;chr&gt;, participant_id_paste &lt;chr&gt;</code></pre>
 </div>
@@ -2712,7 +2700,7 @@ other
 <p>The first column of this table have all modes found in trip dataset. The second column has a classification where some of the modes are grouped into bigger categories (I created it in Spanish). Third column has its equivalence so it can be used in the package taking into account travel modes defined in standardized_modes file (…/ITHIM-R/data/global/modes/standardized_modes.csv) . Last column has the hierarchy I created to define the trip main mode. The smaller the number, the more important the mode is.</p>
 <p>Now with respect to trip purpose, I only had to translate them. This is the result:</p>
 <pre class="r"><code>#table(trips$DESC_MOTIVO_VIAJE, trips$MOTIVO_VIAJE)
-purpose &lt;- read_excel(&quot;C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/Data/Colombia/Hierarchy.xlsx&quot;, sheet = &quot;Cali_purpose&quot;)
+purpose &lt;- read_excel(&quot;C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/Data/Colombia/Hierarchy.xlsx&quot;, sheet = &quot;Medellin_purpose&quot;)
 purpose %&gt;% kbl() %&gt;% kable_classic()</code></pre>
 <table class=" lightable-classic" style="font-family: &quot;Arial Narrow&quot;, &quot;Source Sans Pro&quot;, sans-serif; margin-left: auto; margin-right: auto;">
 <thead>
@@ -2734,7 +2722,7 @@ ITHIM
 01
 </td>
 <td style="text-align:left;">
-Trabajar
+Al Trabajo
 </td>
 <td style="text-align:left;">
 work
@@ -2745,18 +2733,7 @@ work
 02
 </td>
 <td style="text-align:left;">
-Asuntos de trabajo
-</td>
-<td style="text-align:left;">
-work
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-03
-</td>
-<td style="text-align:left;">
-Estudiar
+Estudio
 </td>
 <td style="text-align:left;">
 school
@@ -2764,10 +2741,21 @@ school
 </tr>
 <tr>
 <td style="text-align:left;">
+03
+</td>
+<td style="text-align:left;">
+Regreso a casa
+</td>
+<td style="text-align:left;">
+return
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
 04
 </td>
 <td style="text-align:left;">
-Recibir atención en salúd
+Almuerzo
 </td>
 <td style="text-align:left;">
 other
@@ -2778,7 +2766,7 @@ other
 05
 </td>
 <td style="text-align:left;">
-Ver a alguien
+Compras
 </td>
 <td style="text-align:left;">
 other
@@ -2789,70 +2777,15 @@ other
 06
 </td>
 <td style="text-align:left;">
-Volver a casa
+Salud
 </td>
 <td style="text-align:left;">
-return
+other
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
 07
-</td>
-<td style="text-align:left;">
-Buscar / Dejar a alguien
-</td>
-<td style="text-align:left;">
-other
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-08
-</td>
-<td style="text-align:left;">
-Buscar / Dejar algo
-</td>
-<td style="text-align:left;">
-other
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-09
-</td>
-<td style="text-align:left;">
-Comer / Tomar algo
-</td>
-<td style="text-align:left;">
-other
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-10
-</td>
-<td style="text-align:left;">
-Compras
-</td>
-<td style="text-align:left;">
-other
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-11
-</td>
-<td style="text-align:left;">
-Trámites
-</td>
-<td style="text-align:left;">
-other
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-12
 </td>
 <td style="text-align:left;">
 Recreación
@@ -2863,21 +2796,43 @@ other
 </tr>
 <tr>
 <td style="text-align:left;">
-13
+08
 </td>
 <td style="text-align:left;">
-Buscar trabajo
+Diligencia o trámite
 </td>
 <td style="text-align:left;">
-work
+other
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-77
+09
 </td>
 <td style="text-align:left;">
-Otra cosa
+Acompañar a alguien
+</td>
+<td style="text-align:left;">
+other
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+10
+</td>
+<td style="text-align:left;">
+Recoger o dejar a alguien
+</td>
+<td style="text-align:left;">
+other
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+11
+</td>
+<td style="text-align:left;">
+Otro
 </td>
 <td style="text-align:left;">
 other
@@ -2905,13 +2860,13 @@ other
 <table class=" lightable-classic" style="font-family: &quot;Arial Narrow&quot;, &quot;Source Sans Pro&quot;, sans-serif; margin-left: auto; margin-right: auto;">
 <thead>
 <tr>
-<th style="text-align:left;">
+<th style="text-align:right;">
 ID_HOGAR
 </th>
-<th style="text-align:left;">
+<th style="text-align:right;">
 ID_MORADOR
 </th>
-<th style="text-align:left;">
+<th style="text-align:right;">
 SEC_VIAJE
 </th>
 <th style="text-align:left;">
@@ -2945,20 +2900,20 @@ DESC_MODO_TTE_E7
 </thead>
 <tbody>
 <tr>
-<td style="text-align:left;">
+<td style="text-align:right;">
 309974
 </td>
-<td style="text-align:left;">
+<td style="text-align:right;">
 2
 </td>
-<td style="text-align:left;">
+<td style="text-align:right;">
 6
 </td>
 <td style="text-align:left;">
-17:00
+00:00
 </td>
 <td style="text-align:left;">
-18:00
+00:00
 </td>
 <td style="text-align:left;">
 A pie 1 cuadra
@@ -2995,14 +2950,15 @@ NA
 <pre class="r"><code>trips_v2 &lt;- trips %&gt;% 
   mutate(trip_id = SEC_VIAJE,
          # Transform decimal to hours
-         trip_start = ISOdatetime(1900,1,1,0,0,0, tz = &quot;GMT&quot;) + 
-           as.difftime(as.numeric(HORA_O)*24, 
-                       unit = &quot;hours&quot;),
-         trip_end = ISOdatetime(1900,1,1,0,0,0, tz = &quot;GMT&quot;) + 
-           as.difftime(as.numeric(HORA_D)*24, 
-                       unit = &quot;hours&quot;),
-         trip_duration = difftime(trip_end, trip_start, 
-                                  units = &quot;mins&quot;),
+         # trip_start = ISOdatetime(1900,1,1,0,0,0, tz = &quot;GMT&quot;) + 
+         #   as.difftime(as.numeric(HORA_O)*24, 
+         #               unit = &quot;hours&quot;),
+         # trip_end = ISOdatetime(1900,1,1,0,0,0, tz = &quot;GMT&quot;) + 
+         #   as.difftime(as.numeric(HORA_D)*24, 
+         #               unit = &quot;hours&quot;),
+         # trip_duration = difftime(trip_end, trip_start, 
+         #                          units = &quot;mins&quot;),
+         trip_duration = as.numeric(difftime(HORA_D, HORA_O, units = &quot;mins&quot;)),
          # Replace modes by its hierarchy
          mode_e1 = main_mode$Hierarchy[
            match(DESC_MODO_TTE_E1, main_mode$SurveyTripMode)],
@@ -3035,50 +2991,48 @@ NA
 <pre class="r"><code>which(duplicated(trips_v2$trip_id_paste))</code></pre>
 <pre><code>## [1] 59151</code></pre>
 <pre class="r"><code>trips_v2[which(duplicated(trips_v2$trip_id_paste)),]</code></pre>
-<pre><code>## # A tibble: 1 x 59
+<pre><code>## # A tibble: 1 x 57
 ## # Rowwise: 
 ##   ID_HOGAR ID_MORADOR SEC_VIAJE ID_MUNICIPIO_O MUNICIPIO_O ID_COMUNA_O COMUNA_O
-##   &lt;chr&gt;    &lt;chr&gt;      &lt;chr&gt;     &lt;chr&gt;          &lt;chr&gt;       &lt;chr&gt;       &lt;chr&gt;   
-## 1 1330375  1128       2612      -              Pereira     -           -       
-## # ... with 52 more variables: ID_BARRIO_O &lt;chr&gt;, BARRIO_O &lt;chr&gt;, SIT_O &lt;chr&gt;,
-## #   HORA_O &lt;chr&gt;, ID_MUNICIPIO_D &lt;chr&gt;, MUNICIPIO_D &lt;chr&gt;, ID_COMUNA_D &lt;chr&gt;,
-## #   COMUNA_D &lt;chr&gt;, ID_BARRIO_D &lt;chr&gt;, BARRIO_D2 &lt;chr&gt;, SIT_D &lt;chr&gt;,
-## #   HORA_D &lt;chr&gt;, MOTIVO_VIAJE &lt;chr&gt;, DESC_MOTIVO_VIAJE &lt;chr&gt;,
-## #   MODO_TTE_E1 &lt;chr&gt;, DESC_MODO_TTE_E1 &lt;chr&gt;, MODO_TTE_E2 &lt;chr&gt;,
-## #   DESC_MODO_TTE_E2 &lt;chr&gt;, MODO_TTE_E3 &lt;chr&gt;, DESC_MODO_TTE_E3 &lt;chr&gt;,
-## #   MODO_TTE_E4 &lt;chr&gt;, DESC_MODO_TTE_E4 &lt;chr&gt;, MODO_TTE_E5 &lt;chr&gt;,
-## #   DEC_MODO_TTE_E5 &lt;chr&gt;, MODO_TTE_E6 &lt;chr&gt;, DESC_MODO_TTE_E6 &lt;chr&gt;,
-## #   MODO_TTE_E7 &lt;chr&gt;, DESC_MODO_TTE_E7 &lt;chr&gt;, FREC_CANTIDAD &lt;chr&gt;,
-## #   ID_FREC_VIAJE &lt;chr&gt;, DESC_ID_FREC_VIAJE &lt;chr&gt;, COSTO_TTE_PARQ &lt;chr&gt;,
+##      &lt;dbl&gt;      &lt;dbl&gt;     &lt;dbl&gt; &lt;chr&gt;          &lt;chr&gt;       &lt;chr&gt;       &lt;chr&gt;   
+## 1  1330375       1128      2612 -              Pereira     -           -       
+## # ... with 50 more variables: ID_BARRIO_O &lt;chr&gt;, BARRIO_O &lt;lgl&gt;, SIT_O &lt;chr&gt;,
+## #   HORA_O &lt;dttm&gt;, ID_MUNICIPIO_D &lt;chr&gt;, MUNICIPIO_D &lt;chr&gt;, ID_COMUNA_D &lt;chr&gt;,
+## #   COMUNA_D &lt;chr&gt;, ID_BARRIO_D &lt;chr&gt;, BARRIO_D2 &lt;lgl&gt;, SIT_D &lt;chr&gt;,
+## #   HORA_D &lt;dttm&gt;, MOTIVO_VIAJE &lt;chr&gt;, DESC_MOTIVO_VIAJE &lt;chr&gt;,
+## #   MODO_TTE_E1 &lt;dbl&gt;, DESC_MODO_TTE_E1 &lt;chr&gt;, MODO_TTE_E2 &lt;dbl&gt;,
+## #   DESC_MODO_TTE_E2 &lt;chr&gt;, MODO_TTE_E3 &lt;dbl&gt;, DESC_MODO_TTE_E3 &lt;chr&gt;,
+## #   MODO_TTE_E4 &lt;dbl&gt;, DESC_MODO_TTE_E4 &lt;chr&gt;, MODO_TTE_E5 &lt;dbl&gt;,
+## #   DEC_MODO_TTE_E5 &lt;chr&gt;, MODO_TTE_E6 &lt;dbl&gt;, DESC_MODO_TTE_E6 &lt;chr&gt;,
+## #   MODO_TTE_E7 &lt;dbl&gt;, DESC_MODO_TTE_E7 &lt;chr&gt;, FREC_CANTIDAD &lt;dbl&gt;,
+## #   ID_FREC_VIAJE &lt;chr&gt;, DESC_ID_FREC_VIAJE &lt;chr&gt;, COSTO_TTE_PARQ &lt;dbl&gt;,
 ## #   FORMA_PAGO_PARQUEADERO &lt;chr&gt;, DESC_FORMA_PAGO_PARQUEADERO &lt;chr&gt;,
 ## #   TIPO_PARQUEO &lt;chr&gt;, DESC_TIPO_PARQUEO &lt;chr&gt;, participant_id_paste &lt;chr&gt;,
-## #   trip_id &lt;chr&gt;, trip_start &lt;dttm&gt;, trip_end &lt;dttm&gt;, trip_duration &lt;drtn&gt;,
-## #   mode_e1 &lt;dbl&gt;, mode_e2 &lt;dbl&gt;, mode_e3 &lt;dbl&gt;, mode_e4 &lt;dbl&gt;, mode_e5 &lt;dbl&gt;,
-## #   mode_e6 &lt;dbl&gt;, mode_e7 &lt;dbl&gt;, trip_purpose &lt;chr&gt;, trip_id_paste &lt;chr&gt;,
-## #   main_modes &lt;dbl&gt;, trip_mode &lt;chr&gt;</code></pre>
+## #   trip_id &lt;dbl&gt;, trip_duration &lt;dbl&gt;, mode_e1 &lt;dbl&gt;, mode_e2 &lt;dbl&gt;,
+## #   mode_e3 &lt;dbl&gt;, mode_e4 &lt;dbl&gt;, mode_e5 &lt;dbl&gt;, mode_e6 &lt;dbl&gt;, mode_e7 &lt;dbl&gt;,
+## #   trip_purpose &lt;chr&gt;, trip_id_paste &lt;chr&gt;, main_modes &lt;dbl&gt;, trip_mode &lt;chr&gt;</code></pre>
 <pre class="r"><code>trips_v2[trips_v2$trip_id_paste == &quot;1330375-1128-2612&quot;,]</code></pre>
-<pre><code>## # A tibble: 2 x 59
+<pre><code>## # A tibble: 2 x 57
 ## # Rowwise: 
 ##   ID_HOGAR ID_MORADOR SEC_VIAJE ID_MUNICIPIO_O MUNICIPIO_O ID_COMUNA_O COMUNA_O
-##   &lt;chr&gt;    &lt;chr&gt;      &lt;chr&gt;     &lt;chr&gt;          &lt;chr&gt;       &lt;chr&gt;       &lt;chr&gt;   
-## 1 1330375  1128       2612      -              Pereira     -           -       
-## 2 1330375  1128       2612      -              Pereira     -           -       
-## # ... with 52 more variables: ID_BARRIO_O &lt;chr&gt;, BARRIO_O &lt;chr&gt;, SIT_O &lt;chr&gt;,
-## #   HORA_O &lt;chr&gt;, ID_MUNICIPIO_D &lt;chr&gt;, MUNICIPIO_D &lt;chr&gt;, ID_COMUNA_D &lt;chr&gt;,
-## #   COMUNA_D &lt;chr&gt;, ID_BARRIO_D &lt;chr&gt;, BARRIO_D2 &lt;chr&gt;, SIT_D &lt;chr&gt;,
-## #   HORA_D &lt;chr&gt;, MOTIVO_VIAJE &lt;chr&gt;, DESC_MOTIVO_VIAJE &lt;chr&gt;,
-## #   MODO_TTE_E1 &lt;chr&gt;, DESC_MODO_TTE_E1 &lt;chr&gt;, MODO_TTE_E2 &lt;chr&gt;,
-## #   DESC_MODO_TTE_E2 &lt;chr&gt;, MODO_TTE_E3 &lt;chr&gt;, DESC_MODO_TTE_E3 &lt;chr&gt;,
-## #   MODO_TTE_E4 &lt;chr&gt;, DESC_MODO_TTE_E4 &lt;chr&gt;, MODO_TTE_E5 &lt;chr&gt;,
-## #   DEC_MODO_TTE_E5 &lt;chr&gt;, MODO_TTE_E6 &lt;chr&gt;, DESC_MODO_TTE_E6 &lt;chr&gt;,
-## #   MODO_TTE_E7 &lt;chr&gt;, DESC_MODO_TTE_E7 &lt;chr&gt;, FREC_CANTIDAD &lt;chr&gt;,
-## #   ID_FREC_VIAJE &lt;chr&gt;, DESC_ID_FREC_VIAJE &lt;chr&gt;, COSTO_TTE_PARQ &lt;chr&gt;,
+##      &lt;dbl&gt;      &lt;dbl&gt;     &lt;dbl&gt; &lt;chr&gt;          &lt;chr&gt;       &lt;chr&gt;       &lt;chr&gt;   
+## 1  1330375       1128      2612 -              Pereira     -           -       
+## 2  1330375       1128      2612 -              Pereira     -           -       
+## # ... with 50 more variables: ID_BARRIO_O &lt;chr&gt;, BARRIO_O &lt;lgl&gt;, SIT_O &lt;chr&gt;,
+## #   HORA_O &lt;dttm&gt;, ID_MUNICIPIO_D &lt;chr&gt;, MUNICIPIO_D &lt;chr&gt;, ID_COMUNA_D &lt;chr&gt;,
+## #   COMUNA_D &lt;chr&gt;, ID_BARRIO_D &lt;chr&gt;, BARRIO_D2 &lt;lgl&gt;, SIT_D &lt;chr&gt;,
+## #   HORA_D &lt;dttm&gt;, MOTIVO_VIAJE &lt;chr&gt;, DESC_MOTIVO_VIAJE &lt;chr&gt;,
+## #   MODO_TTE_E1 &lt;dbl&gt;, DESC_MODO_TTE_E1 &lt;chr&gt;, MODO_TTE_E2 &lt;dbl&gt;,
+## #   DESC_MODO_TTE_E2 &lt;chr&gt;, MODO_TTE_E3 &lt;dbl&gt;, DESC_MODO_TTE_E3 &lt;chr&gt;,
+## #   MODO_TTE_E4 &lt;dbl&gt;, DESC_MODO_TTE_E4 &lt;chr&gt;, MODO_TTE_E5 &lt;dbl&gt;,
+## #   DEC_MODO_TTE_E5 &lt;chr&gt;, MODO_TTE_E6 &lt;dbl&gt;, DESC_MODO_TTE_E6 &lt;chr&gt;,
+## #   MODO_TTE_E7 &lt;dbl&gt;, DESC_MODO_TTE_E7 &lt;chr&gt;, FREC_CANTIDAD &lt;dbl&gt;,
+## #   ID_FREC_VIAJE &lt;chr&gt;, DESC_ID_FREC_VIAJE &lt;chr&gt;, COSTO_TTE_PARQ &lt;dbl&gt;,
 ## #   FORMA_PAGO_PARQUEADERO &lt;chr&gt;, DESC_FORMA_PAGO_PARQUEADERO &lt;chr&gt;,
 ## #   TIPO_PARQUEO &lt;chr&gt;, DESC_TIPO_PARQUEO &lt;chr&gt;, participant_id_paste &lt;chr&gt;,
-## #   trip_id &lt;chr&gt;, trip_start &lt;dttm&gt;, trip_end &lt;dttm&gt;, trip_duration &lt;drtn&gt;,
-## #   mode_e1 &lt;dbl&gt;, mode_e2 &lt;dbl&gt;, mode_e3 &lt;dbl&gt;, mode_e4 &lt;dbl&gt;, mode_e5 &lt;dbl&gt;,
-## #   mode_e6 &lt;dbl&gt;, mode_e7 &lt;dbl&gt;, trip_purpose &lt;chr&gt;, trip_id_paste &lt;chr&gt;,
-## #   main_modes &lt;dbl&gt;, trip_mode &lt;chr&gt;</code></pre>
+## #   trip_id &lt;dbl&gt;, trip_duration &lt;dbl&gt;, mode_e1 &lt;dbl&gt;, mode_e2 &lt;dbl&gt;,
+## #   mode_e3 &lt;dbl&gt;, mode_e4 &lt;dbl&gt;, mode_e5 &lt;dbl&gt;, mode_e6 &lt;dbl&gt;, mode_e7 &lt;dbl&gt;,
+## #   trip_purpose &lt;chr&gt;, trip_id_paste &lt;chr&gt;, main_modes &lt;dbl&gt;, trip_mode &lt;chr&gt;</code></pre>
 <pre class="r"><code>trips_v2 &lt;- trips_v2[-which(duplicated(trips_v2$trip_id_paste)),]</code></pre>
 <p>I verify that there are no duplicates in trip dataset</p>
 <pre class="r"><code>length(unique(trips_v2$trip_id_paste)) == nrow(trips_v2)</code></pre>
@@ -3115,7 +3069,7 @@ report$meta_data[10] &lt;- &quot;...&quot; # missing modes#&#39; </code></pre>
 <pre class="r"><code>sum(is.na(report$sex))</code></pre>
 <pre><code>## [1] 0</code></pre>
 <pre class="r"><code>sum(is.na(report$age))</code></pre>
-<pre><code>## [1] 0</code></pre>
+<pre><code>## [1] 9</code></pre>
 <pre class="r"><code>sum(is.na(report$trip_duration))</code></pre>
 <pre><code>## [1] 6494</code></pre>
 <pre class="r"><code>sum(is.na(report$trip_mode))</code></pre>

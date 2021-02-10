@@ -99,13 +99,13 @@ route <- "C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/Data/C
 #+ warning=FALSE, message=FALSE, cache=TRUE
 # Households (hh)
 hh <- read_excel(paste0(route, "EOD_2017_DatosViajes.xlsx"), 
-                        sheet = "DATOS HOGARES", col_types = "text") 
+                        sheet = "DATOS HOGARES") 
 # People
 people <- read_excel(paste0(route, "EOD_2017_DatosViajes.xlsx"),
-                            sheet = "DATOS MORADORES", col_types = "text")
+                            sheet = "DATOS MORADORES")
 # Trips
 trips <- read_excel(paste0(route, "EOD_2017_DatosViajes.xlsx"), 
-                           sheet = "DATOS VIAJES", col_types = "text")
+                           sheet = "DATOS VIAJES")
 trips <- trips[rowSums(is.na(trips)) != ncol(trips), ] # Removing blank rows
 
 #' ### Number of rows
@@ -203,7 +203,7 @@ main_mode %>% kbl() %>% kable_classic()
 #' Now with respect to trip purpose, I only had to translate them. This is the
 #' result:
 #table(trips$DESC_MOTIVO_VIAJE, trips$MOTIVO_VIAJE)
-purpose <- read_excel("C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/Data/Colombia/Hierarchy.xlsx", sheet = "Cali_purpose")
+purpose <- read_excel("C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/Data/Colombia/Hierarchy.xlsx", sheet = "Medellin_purpose")
 purpose %>% kbl() %>% kable_classic()
 
 #' The first two columns have been taken from the dataset, and the third column
@@ -257,14 +257,15 @@ trips %>% filter(ID_HOGAR == "309974", ID_MORADOR == "2",
 trips_v2 <- trips %>% 
   mutate(trip_id = SEC_VIAJE,
          # Transform decimal to hours
-         trip_start = ISOdatetime(1900,1,1,0,0,0, tz = "GMT") + 
-           as.difftime(as.numeric(HORA_O)*24, 
-                       unit = "hours"),
-         trip_end = ISOdatetime(1900,1,1,0,0,0, tz = "GMT") + 
-           as.difftime(as.numeric(HORA_D)*24, 
-                       unit = "hours"),
-         trip_duration = difftime(trip_end, trip_start, 
-                                  units = "mins"),
+         # trip_start = ISOdatetime(1900,1,1,0,0,0, tz = "GMT") + 
+         #   as.difftime(as.numeric(HORA_O)*24, 
+         #               unit = "hours"),
+         # trip_end = ISOdatetime(1900,1,1,0,0,0, tz = "GMT") + 
+         #   as.difftime(as.numeric(HORA_D)*24, 
+         #               unit = "hours"),
+         # trip_duration = difftime(trip_end, trip_start, 
+         #                          units = "mins"),
+         trip_duration = as.numeric(difftime(HORA_D, HORA_O, units = "mins")),
          # Replace modes by its hierarchy
          mode_e1 = main_mode$Hierarchy[
            match(DESC_MODO_TTE_E1, main_mode$SurveyTripMode)],
