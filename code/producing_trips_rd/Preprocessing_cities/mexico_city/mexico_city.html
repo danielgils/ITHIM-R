@@ -11,7 +11,7 @@
 
 <meta name="author" content="Daniel" />
 
-<meta name="date" content="2021-02-05" />
+<meta name="date" content="2021-02-09" />
 
 <title>Preprocessing of Mexico City’s travel dataset</title>
 
@@ -1707,7 +1707,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">Preprocessing of Mexico City’s travel dataset</h1>
 <h4 class="author">Daniel</h4>
-<h4 class="date">2021-02-05</h4>
+<h4 class="date">2021-02-09</h4>
 
 </div>
 
@@ -1715,8 +1715,8 @@ div.tocify {
 <div id="understanding-phase" class="section level1">
 <h1><strong>Understanding phase</strong></h1>
 <pre><code>##           used (Mb) gc trigger  (Mb) max used (Mb)
-## Ncells  996347 53.3    2042660 109.1  1288715 68.9
-## Vcells 1676235 12.8    8388608  64.0  2179348 16.7</code></pre>
+## Ncells  996351 53.3    2042755 109.1  1288547 68.9
+## Vcells 1676324 12.8    8388608  64.0  2183013 16.7</code></pre>
 <div id="documentation" class="section level2">
 <h2>Documentation</h2>
 <p>Documentation is located in “…/Mexico/MexicoCity/Encuesta2017/Documentacion/” . These files were found in <a href="https://www.inegi.org.mx/programas/eod/2017/" class="uri">https://www.inegi.org.mx/programas/eod/2017/</a></p>
@@ -2575,8 +2575,12 @@ other
          p5_9_2 = as.numeric(p5_9_2),
          p5_10_1 = as.numeric(p5_10_1),
          p5_10_2 = as.numeric(p5_10_2),
-         trip_duration = ifelse(p5_10_2 == &quot;99&quot;, 0, 
-                                as.numeric(difftime(strptime(paste(p5_10_1,p5_10_2, sep = &quot;:&quot;),&quot;%H:%M&quot;), strptime(paste(p5_9_1,p5_9_2, sep = &quot;:&quot;),&quot;%H:%M&quot;)))),
+         # trip_duration = ifelse(p5_10_2 == &quot;99&quot;, 0, 
+         #                        as.numeric(difftime(strptime(paste(p5_10_1,p5_10_2, sep = &quot;:&quot;),&quot;%H:%M&quot;), strptime(paste(p5_9_1,p5_9_2, sep = &quot;:&quot;),&quot;%H:%M&quot;)))),
+         trip_duration = (p5_10_1 - p5_9_1)*60 + (p5_10_2 - p5_9_2),
+         trip_duration = ifelse(trip_duration &lt; (-450), 1440 + trip_duration, trip_duration),
+         trip_duration = ifelse(trip_duration &lt; 0, 0 - trip_duration, trip_duration),
+         trip_duration = ifelse(trip_duration == 0, NA, trip_duration),
          # Defining hierarchy
          auto = ifelse(p5_14_01 == 1, 
                        main_mode$Hierarchy[main_mode$Code == &quot;01&quot;], 99),
@@ -2638,8 +2642,12 @@ other
          p5_9_2 = as.numeric(p5_9_2),
          p5_10_1 = as.numeric(p5_10_1),
          p5_10_2 = as.numeric(p5_10_2),
-         trip_duration = ifelse(p5_10_2 == &quot;99&quot;, 0, 
-                                as.numeric(difftime(strptime(paste(p5_10_1,p5_10_2, sep = &quot;:&quot;),&quot;%H:%M&quot;), strptime(paste(p5_9_1,p5_9_2, sep = &quot;:&quot;),&quot;%H:%M&quot;)))),
+         # trip_duration = ifelse(p5_10_2 == &quot;99&quot;, 0, 
+         #                        as.numeric(difftime(strptime(paste(p5_10_1,p5_10_2, sep = &quot;:&quot;),&quot;%H:%M&quot;), strptime(paste(p5_9_1,p5_9_2, sep = &quot;:&quot;),&quot;%H:%M&quot;)))),
+         trip_duration = (p5_10_1 - p5_9_1)*60 + (p5_10_2 - p5_9_2),
+         trip_duration = ifelse(trip_duration &lt; (-450), 1440 + trip_duration, trip_duration),
+         trip_duration = ifelse(trip_duration &lt; 0, 0 - trip_duration, trip_duration),
+         trip_duration = ifelse(trip_duration == 0, NA, trip_duration),
          # Defining hierarchy
          auto = ifelse(p5_14_01 == 1, 
                        main_mode$Hierarchy[main_mode$Code == &quot;01&quot;], 99),
@@ -2731,7 +2739,7 @@ report_weekday$meta_data[10] &lt;- &quot;&quot; # missing modes</code></pre>
 <pre class="r"><code>sum(is.na(report_weekday$age))</code></pre>
 <pre><code>## [1] 0</code></pre>
 <pre class="r"><code>sum(is.na(report_weekday$trip_duration))</code></pre>
-<pre><code>## [1] 17889</code></pre>
+<pre><code>## [1] 17964</code></pre>
 <pre class="r"><code>sum(is.na(report_weekday$trip_mode))</code></pre>
 <pre><code>## [1] 17889</code></pre>
 <p>Export dataset to make the report</p>
@@ -2769,7 +2777,7 @@ report_weekend$meta_data[10] &lt;- &quot;&quot; # missing modes</code></pre>
 <pre class="r"><code>sum(is.na(report_weekend$age))</code></pre>
 <pre><code>## [1] 0</code></pre>
 <pre class="r"><code>sum(is.na(report_weekend$trip_duration))</code></pre>
-<pre><code>## [1] 37863</code></pre>
+<pre><code>## [1] 37916</code></pre>
 <pre class="r"><code>sum(is.na(report_weekend$trip_mode))</code></pre>
 <pre><code>## [1] 37863</code></pre>
 <p>Export dataset to make the report</p>
