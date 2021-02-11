@@ -335,7 +335,7 @@ report <- people_cali %>%
   mutate(cluster_id = 1,
          household_id = ORDEN,
          participant_id = ID_PER,
-         age = P_05_B,
+         age = as.numeric(P_05_B),
          sex = ifelse(P_04_B == "HOMBRE", "Male", "Female"),
          participant_wt = F_EXP.x,
          meta_data = NA) %>% 

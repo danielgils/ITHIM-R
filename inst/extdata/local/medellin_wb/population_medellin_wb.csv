@@ -1,7 +1,7 @@
 sex,age,population
 Female,0-4,70411
-Female,5-sep,73547
-Female,oct-14,80380
+Female,5-9,73547
+Female,10-14,80380
 Female,15-19,95337
 Female,20-24,113106
 Female,25-29,112580
@@ -20,8 +20,8 @@ Female,85-89,8274
 Female,90-94,4271
 Female,95-105,3088
 Male,0-4,73416
-Male,5-sep,75936
-Male,oct-14,82329
+Male,5-9,75936
+Male,10-14,82329
 Male,15-19,96881
 Male,20-24,113210
 Male,25-29,111768
