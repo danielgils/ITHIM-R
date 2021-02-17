@@ -3,12 +3,13 @@ rm(list=ls())
 cities <- c('accra', 'bangalore', 'belo_horizonte', 'bogota', 'buenos_aires', 'cape_town',
             'delhi', 'mexico_city', 'santiago', 'sao_paulo', 'vizag', 'medellin_wb')
 
-cities <- c('bogota', "mexico_city")
+cities <- c("bogota_wb2", "medellin_wb", "cali_wb", 
+            "mexico_city_wb", "santiago_wb")
 
 min_age <- 15
 max_age <- 69
 
-all_inputs <- read.csv('all_city_parameter_inputs.csv',stringsAsFactors = F)
+all_inputs <- read.csv('all_city_parameter_inputs_wb.csv',stringsAsFactors = F)
 
 #all_inputs$cape_town <- all_inputs$accra
 #all_inputs$vizag <- all_inputs$sao_paulo
@@ -86,11 +87,12 @@ cas_exponent <- 0.5
 ## without uncertainty
 toplot <- matrix(0,nrow=5,ncol=length(cities)) #5 scenarios, 4 cities
 ithim_objects <- list()
-for(city in cities){
+for (city in cities) {
   print(city)
   ithim_objects[[city]] <- run_ithim_setup(DIST_CAT = c("0-1 km", "2-5 km", "6+ km"),
                                   ADD_WALK_TO_BUS_TRIPS = as.logical(add_walk_to_bus_trips[[city]]),
                                   CITY = city,
+                                  WB = TRUE, # Is for the wB?
                                   AGE_RANGE = c(min_age,max_age),
                                   ADD_TRUCK_DRIVERS = F,
                                   MAX_MODE_SHARE_SCENARIO = T,
@@ -160,4 +162,4 @@ for(city in cities){
 ##########
 
 # saveRDS(ithim_objects, paste("results/multi_city/io", CAS_EXPONENT, STR_EXPONENT, ".rds", sep = "_"),version = 2)
-saveRDS(ithim_objects, "results/multi_city/io.rds", version = 2)
+saveRDS(ithim_objects, "results/multi_city/io_wb.rds", version = 2)

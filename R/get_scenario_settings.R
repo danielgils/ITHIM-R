@@ -34,6 +34,11 @@ get_scenario_settings <- function(cities = c('accra', 'bangalore', 'belo_horizon
                                                  shared_taxi = 9, 
                                                  cycle_rickshaw = 5 
                                   )){
+  # If analyze WB cities, then the computation of max modes is for only these
+  # cities
+  if (WB)
+    cities <- c("bogota_wb2", "medellin_wb", "cali_wb", "mexico_city_wb",
+                "santiago_wb")
   
   min_distances <- as.numeric(sapply(distances,function(x)strsplit(x, "[^0-9]+")[[1]][1]))
   mode_proportions <- mode_proportions_by_distance <- list()

@@ -54,6 +54,7 @@
 #' @export
 run_ithim_setup <- function(seed = 1,
                             CITY = 'accra',
+                            WB = FALSE,
                             speeds = NULL,
                             PM_emission_inventory = NULL,
                             CO2_emission_inventory = NULL,
@@ -156,6 +157,9 @@ run_ithim_setup <- function(seed = 1,
   ## SET GLOBAL VALUES
   ## PROGRAMMING VARIABLES
   NSAMPLES <<- NSAMPLES
+  
+  ## Is it the world bank processing?
+  WB <<- WB
   
   ## MODEL FLAGS
   ADD_WALK_TO_BUS_TRIPS <<- ADD_WALK_TO_BUS_TRIPS
