@@ -21,19 +21,54 @@ rm(list = ls());gc()
 #' # Definitions
 #+ warning=FALSE, message=FALSE, echo=FALSE
 data.frame(
-Ciudad = c("Bogota2019", "Mexico", "Cali", "Medellin", "Santiago"),
+Ciudad = c("Bogota2019", "Mexico", "Cali", "Medellin", "Santiago", "Sao Paulo",
+           "Rosario", "Lima", "Montevideo"),
 Trip = c("Moving from one part to another with a specific reason/motive, a definite hour of start and end, a mode of transport, and a duration greater than 3 minutes. Or moving from one part to another with reason/motive work or study of any duration",
          "Moving from one part to another with a specific reason/motive, using one or multiples modes of transport",
          "Moving from one part to another with a specific reason/motive and a duration longer than 3 minutes. Or moving from one part to another with reason/motive work or study of any duration",
          "Couldn't find the definition",
          "Any movement carried out on public roads with a purpose
-determined, between two places (origin and destination) at a certain time of day; It can be carried out in several modes of transport and consist of one or more stages"),
-Collection = c("Trips made the day of reference, i.e., the day before the survey.",
+determined, between two places (origin and destination) at a certain time of day; It can be carried out in several modes of transport and consist of one or more stages",
+         "Moving for a specific reason between two specific points (origin and destination), using one or more modes of transport. Walking trips where the reason for the trip is work or school, regardless of the distance travelled; or the distance covered is more than 500 mts for other reasons.",
+         "A trip of 4 blocks or more (from the questionnaire).",
+         "only people over 6 years old.",
+         "..."),
+Collection = c("Trips made the day of reference, i.e., the day before the survey (from 4am yesterday to 4am today). Surveys made from Monday to Sunday (according to the dataset).",
           "Trips made during the week (Tuesday, Wednesday, Thursday) and in Saturdays (weekends)",
-          "Trips made the day of reference, i.e., the day before the survey.",
+          "Trips made the day of reference, i.e., the day before the survey (from 4am yesterday to 4am today). Surveys made from Monday to Sunday (according to the dataset).",
           "Trips made the day of reference, i.e., last 24 hours",
-          "Trips made in working days (regular season), in weekends (regular season) and in working days(summer season)"),
-Questionnaire = c("...", "...", "...", "...", "...")
+          "Trips made in working days (regular season), in weekends (regular season) and in working days(summer season)",
+          "Trips made the day before the survey (from 4am yesterday to 3:59am today).",
+          "Trips made the working day before the survey (from 4am yesterday to 4am today).",
+          "...",
+          "Trips made the day before the survey (from 4am yesterday to 4am today)."),
+Diary = c("No diary, questionnaire", 
+          "Yes, one for weekdays and one for saturdays", 
+          "No diary, questionnaire", 
+          "No diary, questionnaire",
+          "Yes, a day was randomly assigned to each respondent.",
+          "No diary, questionnaire",
+          "No diary, questionnaire",
+          "No diary, questionnaire",
+          "No diary, questionnaire"), 
+Frequency = c("Yes. Monday to Sunday or Occasional", 
+              "No", 
+              "No", 
+              "Yes, daily, weekly, monthly, yearly.", 
+              "No",
+              "No, but it asks the day of the week when the trip was made",
+              "No",
+              "No",
+              "Yes, 5 days a week, 3-4 days a week, 1-2 days a week, 2-3 days a month, once a month"),
+Trip_duration = c("Already in the dataset", 
+                  "I calculated it", 
+                  "Already in the dataset", 
+                  "I calculated it", 
+                  "Already in the dataset",
+                  "Already in the dataset",
+                  "Already in the dataset",
+                  "I have to calculate it",
+                  "I have to calculate it")
 ) %>% kbl() %>% kable_classic()
 
 
@@ -66,7 +101,7 @@ cbind(Bogota2015 = summary(bogota_2015$trip_duration),
 
 #' # Density plot
 #' ### *These plots are interactive so we can zoom in and out, and select cities.*
-ggplotly(
+g1 <- ggplotly(
   ggplot() + 
     geom_density(aes(trip_duration, fill = "Bogota2015"), alpha = .3 , 
                           data = bogota_2015) +
@@ -87,6 +122,9 @@ ggplotly(
     geom_density(aes(trip_duration, fill = "Santiago"), alpha = .3 , 
                  data = santiago) 
     )
+
+#htmlwidgets::saveWidget(g1, "g1.html")
+#display_html('')
 
 #' # Density plot by mode
 #' ## Bogota 2015
