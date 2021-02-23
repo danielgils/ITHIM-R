@@ -179,4 +179,8 @@ write_csv(cali2, "C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBan
 pereira1 <- subset(adulto_persona2, DEPTO == "RISARALDA" & cabecera.x == 1)
 pereira2 <- subset(adulto_persona2, nivel_urb == 1)
 
+#' *Bogota*
+unique(adulto_persona2$DEPTO)
+bogota1 <- subset(adulto_persona2, DEPTO == "BOGOTA D.C." & cabecera.x == 1)
+write_csv(bogota1, "C:/Users/danie/Documents/Daniel_Gil/Consultorias/2020/WorldBank/Data/Colombia/Bogota/Cleaned/pa_bogota_wb2.csv")
 
