@@ -268,7 +268,7 @@ purpose %>% kbl() %>% kable_classic()
 # })
 
 trips_v2 <- trips %>% 
-  mutate(trip_id = Hogar,
+  mutate(trip_id = Viaje,
          trip_duration = TiempoViaje,
          #' To create trip_mode I have to extract first the modes used from
          #' variable *MediosUsados*.
